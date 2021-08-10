@@ -1,0 +1,59 @@
+{
+  parserClass = "com.andreybotanic.asm.nasm.parser.NasmParser"
+
+  extends = "com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix = "Nasm"
+  psiImplClassSuffix = "Impl"
+  psiPackage = "com.andreybotanic.asm.nasm.psi"
+  psiImplPackage = "com.andreybotanic.asm.nasm.psi.impl"
+
+  elementTypeHolderClass = "com.andreybotanic.asm.nasm.psi.NasmTypes"
+  elementTypeClass = "com.andreybotanic.asm.nasm.psi.NasmElementType"
+  tokenTypeClass = "com.andreybotanic.asm.nasm.psi.NasmTokenType"
+
+  tokens = [
+    WHITE_SPACE = 'regexp:[ \t\x0B\f]+'
+    EOL = 'regexp:\R'
+    SEPARATOR = ','
+    COLON = ':'
+
+    BINARY = 'regexp:[1][01]*b'
+    DECIMAL = 'regexp:0|[1-9][0-9]*'
+    HEXADECIMAL = 'regexp:(0x[0-9A-Fa-f]+)|([0-9A-Fa-f]+h)'
+
+    COMMENT = 'regexp:;[^\r\n]*'
+
+
+
+    REGISTER = 'regexp:[re]?[abcd]x|[abcd][hl]'
+
+    GENERAL_OP = 'regexp:mov|xor|add|inc|dec|jmp'
+
+    IDENTIFIER = 'regexp:([a-zA-Z$._?#@]+[a-zA-Z0-9$._~]*)'
+
+  ]
+}
+
+NasmFile ::= item_*
+
+private item_ ::= COMMENT
+                | Label
+                | Instruction
+                | EOL
+                | IDENTIFIER
+                ;
+
+Instruction ::= Operation Operands? (<<eof>> | EOL+)?
+
+Operands ::= Operand (SEPARATOR Operand)*
+
+Operand ::= REGISTER
+            | Number
+            | IDENTIFIER
+
+Label ::= IDENTIFIER COLON EOL*
+
+Number ::= DECIMAL | HEXADECIMAL
+
+Operation ::= GENERAL_OP
