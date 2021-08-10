@@ -12,7 +12,12 @@
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
+        <fileType name="NASM File"
+                  implementationClass="com.andreybotanic.asm.nasm.NasmFileType"
+                  fieldName="INSTANCE"
+                  language="Nasm"
+                  extensions="asm"
+        />
     </extensions>
 
     <actions>
