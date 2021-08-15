@@ -8,8 +8,10 @@ import com.andreybotanic.asm.nasm.psi.impl.*;
 
 public interface NasmTypes {
 
+  IElementType IDENTIFIER = new NasmElementType("IDENTIFIER");
   IElementType INSTRUCTION = new NasmElementType("INSTRUCTION");
   IElementType LABEL = new NasmElementType("LABEL");
+  IElementType LABEL_IDENTIFIER = new NasmElementType("LABEL_IDENTIFIER");
   IElementType OPERAND = new NasmElementType("OPERAND");
   IElementType OPERANDS = new NasmElementType("OPERANDS");
   IElementType OPERATION = new NasmElementType("OPERATION");
@@ -66,11 +68,17 @@ public interface NasmTypes {
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-      if (type == INSTRUCTION) {
+      if (type == IDENTIFIER) {
+        return new NasmIdentifierImpl(node);
+      }
+      else if (type == INSTRUCTION) {
         return new NasmInstructionImpl(node);
       }
       else if (type == LABEL) {
         return new NasmLabelImpl(node);
+      }
+      else if (type == LABEL_IDENTIFIER) {
+        return new NasmLabelIdentifierImpl(node);
       }
       else if (type == OPERAND) {
         return new NasmOperandImpl(node);

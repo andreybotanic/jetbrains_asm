@@ -29,6 +29,18 @@ public class NasmOperandImpl extends ASTWrapperPsiElement implements NasmOperand
 
   @Override
   @Nullable
+  public NasmIdentifier getIdentifier() {
+    return findChildByClass(NasmIdentifier.class);
+  }
+
+  @Override
+  @Nullable
+  public NasmLabelIdentifier getLabelIdentifier() {
+    return findChildByClass(NasmLabelIdentifier.class);
+  }
+
+  @Override
+  @Nullable
   public PsiElement getBinary() {
     return findChildByType(BINARY);
   }
@@ -49,18 +61,6 @@ public class NasmOperandImpl extends ASTWrapperPsiElement implements NasmOperand
   @Nullable
   public PsiElement getHexadecimal() {
     return findChildByType(HEXADECIMAL);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getId() {
-    return findChildByType(ID);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getLbl() {
-    return findChildByType(LBL);
   }
 
   @Override

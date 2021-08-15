@@ -8,6 +8,12 @@ import com.intellij.psi.PsiElement;
 public interface NasmOperand extends PsiElement {
 
   @Nullable
+  NasmIdentifier getIdentifier();
+
+  @Nullable
+  NasmLabelIdentifier getLabelIdentifier();
+
+  @Nullable
   PsiElement getBinary();
 
   @Nullable
@@ -18,12 +24,6 @@ public interface NasmOperand extends PsiElement {
 
   @Nullable
   PsiElement getHexadecimal();
-
-  @Nullable
-  PsiElement getId();
-
-  @Nullable
-  PsiElement getLbl();
 
   @Nullable
   PsiElement getRegister();

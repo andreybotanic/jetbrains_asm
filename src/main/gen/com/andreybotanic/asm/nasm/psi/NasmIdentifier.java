@@ -4,16 +4,19 @@ package com.andreybotanic.asm.nasm.psi;
 import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
 
-public interface NasmLabel extends NasmNamedElement {
+public interface NasmIdentifier extends NasmNamedElement {
 
   @NotNull
-  PsiElement getLblDef();
+  PsiElement getId();
 
   String getName();
 
   PsiElement setName(String newName);
 
-  PsiElement getNameIdentifier();
+  @NotNull PsiElement getNameIdentifier();
+
+  @NotNull PsiReference[] getReferences();
 
 }

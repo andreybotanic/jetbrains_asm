@@ -9,15 +9,16 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static com.andreybotanic.asm.nasm.psi.NasmTypes.*;
 import com.andreybotanic.asm.nasm.psi.*;
+import com.intellij.psi.PsiReference;
 
-public class NasmLabelImpl extends NasmNamedElementImpl implements NasmLabel {
+public class NasmLabelIdentifierImpl extends NasmNamedElementImpl implements NasmLabelIdentifier {
 
-  public NasmLabelImpl(@NotNull ASTNode node) {
+  public NasmLabelIdentifierImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NasmVisitor visitor) {
-    visitor.visitLabel(this);
+    visitor.visitLabelIdentifier(this);
   }
 
   @Override
@@ -27,9 +28,15 @@ public class NasmLabelImpl extends NasmNamedElementImpl implements NasmLabel {
   }
 
   @Override
-  @NotNull
-  public PsiElement getLblDef() {
-    return findNotNullChildByType(LBL_DEF);
+  @Nullable
+  public PsiElement getId() {
+    return findChildByType(ID);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getLbl() {
+    return findChildByType(LBL);
   }
 
   @Override
@@ -45,6 +52,11 @@ public class NasmLabelImpl extends NasmNamedElementImpl implements NasmLabel {
   @Override
   public PsiElement getNameIdentifier() {
     return NasmPsiImplUtil.getNameIdentifier(this);
+  }
+
+  @Override
+  public @NotNull PsiReference[] getReferences() {
+    return NasmPsiImplUtil.getReferences(this);
   }
 
 }

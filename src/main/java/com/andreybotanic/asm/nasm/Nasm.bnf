@@ -12,6 +12,8 @@
   elementTypeClass = "com.andreybotanic.asm.nasm.psi.NasmElementType"
   tokenTypeClass = "com.andreybotanic.asm.nasm.psi.NasmTokenType"
 
+  psiImplUtilClass = "com.andreybotanic.asm.nasm.psi.impl.NasmPsiImplUtil"
+
   tokens = [
     // Most tokens I get from https://github.com/ajkhoury/JetBrains-NASM-Language/blob/master/src/com/nasmlanguage/NASM.bnf
 
@@ -90,14 +92,30 @@ private item_ ::= COMMENT
 
 Instruction ::= Operation Operands? (<<eof>> | EOL+)?
 
+Operation ::= GENERAL_OP
+
 Operands ::= Operand (SEPARATOR Operand)*
 
 Operand ::= REGISTER
             | (BINARY | DECIMAL | HEXADECIMAL | FLOAT_DECIMAL)
-            | ID
-            | LBL
+            | Identifier
+            | LabelIdentifier
             ;
 
-Label ::= LBL_DEF EOL*
+Label ::= LBL_DEF EOL* {
+    mixin       = "com.andreybotanic.asm.nasm.psi.impl.NasmNamedElementImpl"
+    implements  = "com.andreybotanic.asm.nasm.psi.NasmNamedElement"
+    methods     = [getName setName getNameIdentifier]
+}
 
-Operation ::= GENERAL_OP
+Identifier ::= ID {
+    mixin       = "com.andreybotanic.asm.nasm.psi.impl.NasmNamedElementImpl"
+    implements  = "com.andreybotanic.asm.nasm.psi.NasmNamedElement"
+    methods     = [getName setName getNameIdentifier getReferences]
+}
+
+LabelIdentifier ::= LBL | ID {
+    mixin       = "com.andreybotanic.asm.nasm.psi.impl.NasmNamedElementImpl"
+    implements  = "com.andreybotanic.asm.nasm.psi.NasmNamedElement"
+    methods     = [getName setName getNameIdentifier getReferences]
+}

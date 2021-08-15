@@ -36,6 +36,18 @@ public class NasmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // ID
+  public static boolean Identifier(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Identifier")) return false;
+    if (!nextTokenIs(b, ID)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, ID);
+    exit_section_(b, m, IDENTIFIER, r);
+    return r;
+  }
+
+  /* ********************************************************** */
   // Operation Operands? (<<eof>> | EOL+)?
   public static boolean Instruction(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Instruction")) return false;
@@ -114,6 +126,19 @@ public class NasmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // LBL | ID
+  public static boolean LabelIdentifier(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "LabelIdentifier")) return false;
+    if (!nextTokenIs(b, "<label identifier>", ID, LBL)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, LABEL_IDENTIFIER, "<label identifier>");
+    r = consumeToken(b, LBL);
+    if (!r) r = consumeToken(b, ID);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
   // item_*
   static boolean NasmFile(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "NasmFile")) return false;
@@ -128,16 +153,16 @@ public class NasmParser implements PsiParser, LightPsiParser {
   /* ********************************************************** */
   // REGISTER
   //             | (BINARY | DECIMAL | HEXADECIMAL | FLOAT_DECIMAL)
-  //             | ID
-  //             | LBL
+  //             | Identifier
+  //             | LabelIdentifier
   public static boolean Operand(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Operand")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, OPERAND, "<operand>");
     r = consumeToken(b, REGISTER);
     if (!r) r = Operand_1(b, l + 1);
-    if (!r) r = consumeToken(b, ID);
-    if (!r) r = consumeToken(b, LBL);
+    if (!r) r = Identifier(b, l + 1);
+    if (!r) r = LabelIdentifier(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
