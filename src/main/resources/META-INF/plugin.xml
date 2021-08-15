@@ -20,6 +20,9 @@
         />
         <lang.parserDefinition language="Nasm"
                                implementationClass="com.andreybotanic.asm.nasm.NasmParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="Nasm"
+                                       implementationClass="com.andreybotanic.asm.nasm.NasmSyntaxHighlighterFactory"/>
+        <colorSettingsPage implementation="com.andreybotanic.asm.nasm.NasmColorSettingsPage"/>
     </extensions>
 
     <actions>

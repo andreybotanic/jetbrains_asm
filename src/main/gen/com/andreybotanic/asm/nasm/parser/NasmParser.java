@@ -90,25 +90,25 @@ public class NasmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // IDENTIFIER COLON EOL*
+  // LBL_DEF EOL*
   public static boolean Label(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Label")) return false;
-    if (!nextTokenIs(b, IDENTIFIER)) return false;
+    if (!nextTokenIs(b, LBL_DEF)) return false;
     boolean r;
     Marker m = enter_section_(b);
-    r = consumeTokens(b, 0, IDENTIFIER, COLON);
-    r = r && Label_2(b, l + 1);
+    r = consumeToken(b, LBL_DEF);
+    r = r && Label_1(b, l + 1);
     exit_section_(b, m, LABEL, r);
     return r;
   }
 
   // EOL*
-  private static boolean Label_2(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "Label_2")) return false;
+  private static boolean Label_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Label_1")) return false;
     while (true) {
       int c = current_position_(b);
       if (!consumeToken(b, EOL)) break;
-      if (!empty_element_parsed_guard_(b, "Label_2", c)) break;
+      if (!empty_element_parsed_guard_(b, "Label_1", c)) break;
     }
     return true;
   }
@@ -126,30 +126,30 @@ public class NasmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // DECIMAL | HEXADECIMAL
-  public static boolean Number(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "Number")) return false;
-    if (!nextTokenIs(b, "<number>", DECIMAL, HEXADECIMAL)) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, NUMBER, "<number>");
-    r = consumeToken(b, DECIMAL);
-    if (!r) r = consumeToken(b, HEXADECIMAL);
-    exit_section_(b, l, m, r, false, null);
-    return r;
-  }
-
-  /* ********************************************************** */
   // REGISTER
-  //             | Number
-  //             | IDENTIFIER
+  //             | (BINARY | DECIMAL | HEXADECIMAL | FLOAT_DECIMAL)
+  //             | ID
+  //             | LBL
   public static boolean Operand(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Operand")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, OPERAND, "<operand>");
     r = consumeToken(b, REGISTER);
-    if (!r) r = Number(b, l + 1);
-    if (!r) r = consumeToken(b, IDENTIFIER);
+    if (!r) r = Operand_1(b, l + 1);
+    if (!r) r = consumeToken(b, ID);
+    if (!r) r = consumeToken(b, LBL);
     exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // BINARY | DECIMAL | HEXADECIMAL | FLOAT_DECIMAL
+  private static boolean Operand_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Operand_1")) return false;
+    boolean r;
+    r = consumeToken(b, BINARY);
+    if (!r) r = consumeToken(b, DECIMAL);
+    if (!r) r = consumeToken(b, HEXADECIMAL);
+    if (!r) r = consumeToken(b, FLOAT_DECIMAL);
     return r;
   }
 
@@ -204,7 +204,7 @@ public class NasmParser implements PsiParser, LightPsiParser {
   //                 | Label
   //                 | Instruction
   //                 | EOL
-  //                 | IDENTIFIER
+  //                 | ID
   static boolean item_(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "item_")) return false;
     boolean r;
@@ -212,7 +212,7 @@ public class NasmParser implements PsiParser, LightPsiParser {
     if (!r) r = Label(b, l + 1);
     if (!r) r = Instruction(b, l + 1);
     if (!r) r = consumeToken(b, EOL);
-    if (!r) r = consumeToken(b, IDENTIFIER);
+    if (!r) r = consumeToken(b, ID);
     return r;
   }
 

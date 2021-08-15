@@ -15,10 +15,6 @@ public class NasmVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitNumber(@NotNull NasmNumber o) {
-    visitPsiElement(o);
-  }
-
   public void visitOperand(@NotNull NasmOperand o) {
     visitPsiElement(o);
   }

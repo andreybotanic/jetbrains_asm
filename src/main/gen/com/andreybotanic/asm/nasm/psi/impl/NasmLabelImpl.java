@@ -29,8 +29,8 @@ public class NasmLabelImpl extends ASTWrapperPsiElement implements NasmLabel {
 
   @Override
   @NotNull
-  public PsiElement getIdentifier() {
-    return findNotNullChildByType(IDENTIFIER);
+  public PsiElement getLblDef() {
+    return findNotNullChildByType(LBL_DEF);
   }
 
 }

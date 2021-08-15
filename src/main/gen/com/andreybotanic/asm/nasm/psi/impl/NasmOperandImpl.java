@@ -29,14 +29,38 @@ public class NasmOperandImpl extends ASTWrapperPsiElement implements NasmOperand
 
   @Override
   @Nullable
-  public NasmNumber getNumber() {
-    return findChildByClass(NasmNumber.class);
+  public PsiElement getBinary() {
+    return findChildByType(BINARY);
   }
 
   @Override
   @Nullable
-  public PsiElement getIdentifier() {
-    return findChildByType(IDENTIFIER);
+  public PsiElement getDecimal() {
+    return findChildByType(DECIMAL);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getFloatDecimal() {
+    return findChildByType(FLOAT_DECIMAL);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getHexadecimal() {
+    return findChildByType(HEXADECIMAL);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getId() {
+    return findChildByType(ID);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getLbl() {
+    return findChildByType(LBL);
   }
 
   @Override

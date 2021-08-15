@@ -8,6 +8,6 @@ import com.intellij.psi.PsiElement;
 public interface NasmLabel extends PsiElement {
 
   @NotNull
-  PsiElement getIdentifier();
+  PsiElement getLblDef();
 
 }
