@@ -39,7 +39,7 @@ public class NasmParserDefinition implements ParserDefinition {
 
     @Override
     public @NotNull TokenSet getCommentTokens() {
-        return COMMENTS;
+        return TokenSet.EMPTY;
     }
 
     @NotNull

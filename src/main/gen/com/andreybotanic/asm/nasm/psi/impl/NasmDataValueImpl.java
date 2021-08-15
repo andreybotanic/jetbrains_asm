@@ -11,14 +11,14 @@ import static com.andreybotanic.asm.nasm.psi.NasmTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.andreybotanic.asm.nasm.psi.*;
 
-public class NasmOperandImpl extends ASTWrapperPsiElement implements NasmOperand {
+public class NasmDataValueImpl extends ASTWrapperPsiElement implements NasmDataValue {
 
-  public NasmOperandImpl(@NotNull ASTNode node) {
+  public NasmDataValueImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NasmVisitor visitor) {
-    visitor.visitOperand(this);
+    visitor.visitDataValue(this);
   }
 
   @Override
@@ -29,50 +29,14 @@ public class NasmOperandImpl extends ASTWrapperPsiElement implements NasmOperand
 
   @Override
   @Nullable
-  public NasmIdentifier getIdentifier() {
-    return findChildByClass(NasmIdentifier.class);
-  }
-
-  @Override
-  @Nullable
-  public NasmLabelIdentifier getLabelIdentifier() {
-    return findChildByClass(NasmLabelIdentifier.class);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getBinary() {
-    return findChildByType(BINARY);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getCharacter() {
-    return findChildByType(CHARACTER);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getDecimal() {
-    return findChildByType(DECIMAL);
+  public NasmExpr getExpr() {
+    return findChildByClass(NasmExpr.class);
   }
 
   @Override
   @Nullable
   public PsiElement getFloatDecimal() {
     return findChildByType(FLOAT_DECIMAL);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getHexadecimal() {
-    return findChildByType(HEXADECIMAL);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getRegister() {
-    return findChildByType(REGISTER);
   }
 
   @Override

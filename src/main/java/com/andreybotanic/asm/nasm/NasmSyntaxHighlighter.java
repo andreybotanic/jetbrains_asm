@@ -8,7 +8,10 @@ import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase;
 import com.intellij.psi.TokenType;
 import com.intellij.psi.tree.IElementType;
+import gnu.trove.THashMap;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
 
 import static com.intellij.openapi.editor.colors.TextAttributesKey.createTextAttributesKey;
 
@@ -25,18 +28,41 @@ public class NasmSyntaxHighlighter extends SyntaxHighlighterBase {
             createTextAttributesKey("NASM_REGISTER", DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey LABEL =
             createTextAttributesKey("NASM_LABEL", DefaultLanguageHighlighterColors.IDENTIFIER);
+    public static final TextAttributesKey STRING =
+            createTextAttributesKey("NASM_STRING", DefaultLanguageHighlighterColors.STRING);
     public static final TextAttributesKey BAD_CHARACTER =
             createTextAttributesKey("NASM_BAD_CHARACTER", HighlighterColors.BAD_CHARACTER);
+    
+    private static final Map<IElementType, TextAttributesKey> AttributesKeys;
+    static {
+        AttributesKeys = new THashMap<>();
+        
+        AttributesKeys.put(NasmTypes.REGISTER, REGISTER);
 
-    private static final TextAttributesKey[] BAD_CHAR_KEYS = new TextAttributesKey[]{BAD_CHARACTER};
-    private static final TextAttributesKey[] SEPARATOR_KEYS = new TextAttributesKey[]{SEPARATOR};
-    private static final TextAttributesKey[] COMMENT_KEYS = new TextAttributesKey[]{COMMENT};
-    private static final TextAttributesKey[] NUMBER_KEYS = new TextAttributesKey[]{NUMBER};
-    private static final TextAttributesKey[] REGISTER_KEYS = new TextAttributesKey[]{REGISTER};
-    private static final TextAttributesKey[] OPERATION_KEYS = new TextAttributesKey[]{OPERATION};
-    private static final TextAttributesKey[] LABEL_KEYS = new TextAttributesKey[]{LABEL};
-    private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
+        AttributesKeys.put(NasmTypes.GENERAL_OP, OPERATION);
+        AttributesKeys.put(NasmTypes.DX, OPERATION);
 
+        AttributesKeys.put(NasmTypes.STRING, STRING);
+        AttributesKeys.put(NasmTypes.CHARACTER, STRING);
+
+        AttributesKeys.put(NasmTypes.NUMERIC_LITERAL, NUMBER);
+        AttributesKeys.put(NasmTypes.ZEROES, NUMBER);
+        AttributesKeys.put(NasmTypes.BINARY, NUMBER);
+        AttributesKeys.put(NasmTypes.DECIMAL, NUMBER);
+        AttributesKeys.put(NasmTypes.HEXADECIMAL, NUMBER);
+        AttributesKeys.put(NasmTypes.FLOAT_DECIMAL, NUMBER);
+
+        AttributesKeys.put(NasmTypes.LBL, LABEL);
+        AttributesKeys.put(NasmTypes.LBL_DEF, LABEL);
+        AttributesKeys.put(NasmTypes.IDENTIFIER, LABEL);
+
+        AttributesKeys.put(NasmTypes.COMMENT, COMMENT);
+        AttributesKeys.put(NasmTypes.SEMICOLON, COMMENT);
+
+        AttributesKeys.put(NasmTypes.SEPARATOR, SEPARATOR);
+
+        AttributesKeys.put(TokenType.BAD_CHARACTER, BAD_CHARACTER);
+    }
 
     @Override
     public @NotNull Lexer getHighlightingLexer() {
@@ -45,25 +71,6 @@ public class NasmSyntaxHighlighter extends SyntaxHighlighterBase {
 
     @Override
     public TextAttributesKey @NotNull [] getTokenHighlights(IElementType tokenType) {
-        if (tokenType.equals(NasmTypes.SEPARATOR)) {
-            return SEPARATOR_KEYS;
-        } else if (tokenType.equals(NasmTypes.BINARY)
-                || tokenType.equals(NasmTypes.DECIMAL)
-                || tokenType.equals(NasmTypes.HEXADECIMAL)
-                || tokenType.equals(NasmTypes.FLOAT_DECIMAL)) {
-            return NUMBER_KEYS;
-        } else if (tokenType.equals(NasmTypes.REGISTER)) {
-            return REGISTER_KEYS;
-        } else if (tokenType.equals(NasmTypes.OPERATION)) {
-            return OPERATION_KEYS;
-        } else if (tokenType.equals(NasmTypes.LBL_DEF) || tokenType.equals(NasmTypes.LBL)) {
-            return LABEL_KEYS;
-        } else if (tokenType.equals(NasmTypes.COMMENT)) {
-            return COMMENT_KEYS;
-        } else if (tokenType.equals(TokenType.BAD_CHARACTER)) {
-            return BAD_CHAR_KEYS;
-        } else {
-            return EMPTY_KEYS;
-        }
+        return SyntaxHighlighterBase.pack(AttributesKeys.get(tokenType));
     }
 }

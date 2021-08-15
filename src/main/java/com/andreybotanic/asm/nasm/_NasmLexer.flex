@@ -25,6 +25,7 @@ import static com.andreybotanic.asm.nasm.psi.NasmTypes.*;
 
 WHITE_SPACE=[ \t\x0B\f]+
 EOL=\R
+DX=[dD][bBwWdDqQtToOyYzZ]
 COMMENT=;[^\r\n]*
 REGISTER=[re]?[abcd]x|[abcd][hl]
 GENERAL_OP=mov|xor|add|inc|dec|jmp
@@ -77,9 +78,12 @@ STRING=(`([^`\\]|\\.)*`|'([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")
   "%"                  { return PERCENT; }
   "%%"                 { return PERCENT2; }
   "%+"                 { return TOKEN_CONCAT; }
+  "NL"                 { return NL; }
+  "SIZE_TYPE"          { return SIZE_TYPE; }
 
   {WHITE_SPACE}        { return WHITE_SPACE; }
   {EOL}                { return EOL; }
+  {DX}                 { return DX; }
   {COMMENT}            { return COMMENT; }
   {REGISTER}           { return REGISTER; }
   {GENERAL_OP}         { return GENERAL_OP; }

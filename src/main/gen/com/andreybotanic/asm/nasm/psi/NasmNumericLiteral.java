@@ -5,13 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NasmOperand extends PsiElement {
-
-  @Nullable
-  NasmIdentifier getIdentifier();
-
-  @Nullable
-  NasmLabelIdentifier getLabelIdentifier();
+public interface NasmNumericLiteral extends NasmExpr {
 
   @Nullable
   PsiElement getBinary();
@@ -29,9 +23,6 @@ public interface NasmOperand extends PsiElement {
   PsiElement getHexadecimal();
 
   @Nullable
-  PsiElement getRegister();
-
-  @Nullable
-  PsiElement getString();
+  PsiElement getZeroes();
 
 }

@@ -8,17 +8,17 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static com.andreybotanic.asm.nasm.psi.NasmTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.andreybotanic.asm.nasm.psi.*;
 
-public class NasmInstructionImpl extends ASTWrapperPsiElement implements NasmInstruction {
+public class NasmParenthesisExprImpl extends NasmExprImpl implements NasmParenthesisExpr {
 
-  public NasmInstructionImpl(@NotNull ASTNode node) {
+  public NasmParenthesisExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull NasmVisitor visitor) {
-    visitor.visitInstruction(this);
+    visitor.visitParenthesisExpr(this);
   }
 
   @Override
@@ -29,20 +29,8 @@ public class NasmInstructionImpl extends ASTWrapperPsiElement implements NasmIns
 
   @Override
   @Nullable
-  public NasmOperands getOperands() {
-    return findChildByClass(NasmOperands.class);
-  }
-
-  @Override
-  @NotNull
-  public NasmOperation getOperation() {
-    return findNotNullChildByClass(NasmOperation.class);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getComment() {
-    return findChildByType(COMMENT);
+  public NasmExpr getExpr() {
+    return findChildByClass(NasmExpr.class);
   }
 
 }

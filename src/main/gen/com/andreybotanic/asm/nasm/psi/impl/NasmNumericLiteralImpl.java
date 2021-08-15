@@ -8,35 +8,23 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static com.andreybotanic.asm.nasm.psi.NasmTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.andreybotanic.asm.nasm.psi.*;
 
-public class NasmOperandImpl extends ASTWrapperPsiElement implements NasmOperand {
+public class NasmNumericLiteralImpl extends NasmExprImpl implements NasmNumericLiteral {
 
-  public NasmOperandImpl(@NotNull ASTNode node) {
+  public NasmNumericLiteralImpl(@NotNull ASTNode node) {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull NasmVisitor visitor) {
-    visitor.visitOperand(this);
+    visitor.visitNumericLiteral(this);
   }
 
   @Override
   public void accept(@NotNull PsiElementVisitor visitor) {
     if (visitor instanceof NasmVisitor) accept((NasmVisitor)visitor);
     else super.accept(visitor);
-  }
-
-  @Override
-  @Nullable
-  public NasmIdentifier getIdentifier() {
-    return findChildByClass(NasmIdentifier.class);
-  }
-
-  @Override
-  @Nullable
-  public NasmLabelIdentifier getLabelIdentifier() {
-    return findChildByClass(NasmLabelIdentifier.class);
   }
 
   @Override
@@ -71,14 +59,8 @@ public class NasmOperandImpl extends ASTWrapperPsiElement implements NasmOperand
 
   @Override
   @Nullable
-  public PsiElement getRegister() {
-    return findChildByType(REGISTER);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getString() {
-    return findChildByType(STRING);
+  public PsiElement getZeroes() {
+    return findChildByType(ZEROES);
   }
 
 }

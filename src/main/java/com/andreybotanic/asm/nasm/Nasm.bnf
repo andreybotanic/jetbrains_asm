@@ -17,14 +17,17 @@
   tokens = [
     // Most tokens I get from https://github.com/ajkhoury/JetBrains-NASM-Language/blob/master/src/com/nasmlanguage/NASM.bnf
 
-    WHITE_SPACE = 'regexp:[ \t\x0B\f]+'
-    EOL = 'regexp:\R'
+    WHITE_SPACE         = 'regexp:[ \t\x0B\f]+'
+    EOL                 = 'regexp:\R'
 
-    COMMENT = 'regexp:;[^\r\n]*'
+    //DATA_OP             = 'regexp:([rR][eE][sS][bBwWdDqQtToOyYzZ]|[dD][bBwWdDqQtToOyYzZ]|[tT][iI][mM][eE][sS])'
+    DX                  = 'regexp:[dD][bBwWdDqQtToOyYzZ]'
 
-    REGISTER = 'regexp:[re]?[abcd]x|[abcd][hl]'
+    COMMENT             = 'regexp:;[^\r\n]*'
 
-    GENERAL_OP = 'regexp:mov|xor|add|inc|dec|jmp'
+    REGISTER            = 'regexp:[re]?[abcd]x|[abcd][hl]'
+
+    GENERAL_OP          = 'regexp:mov|xor|add|inc|dec|jmp'
 
     // Make last!
     ID                  = 'regexp:([a-zA-Z_?]+[a-zA-Z0-9_$.#@~?]*)' // Some identifier
@@ -86,11 +89,12 @@ NasmFile ::= item_*
 private item_ ::= COMMENT
                 | Label
                 | Instruction
+                | DataElement
                 | EOL
                 | ID
                 ;
 
-Instruction ::= Operation Operands? (<<eof>> | EOL+)?
+Instruction ::= Operation Operands? COMMENT? (<<eof>> | EOL+)?
 
 Operation ::= GENERAL_OP
 
@@ -98,6 +102,8 @@ Operands ::= Operand (SEPARATOR Operand)*
 
 Operand ::= REGISTER
             | (BINARY | DECIMAL | HEXADECIMAL | FLOAT_DECIMAL)
+            | STRING
+            | CHARACTER
             | Identifier
             | LabelIdentifier
             ;
@@ -119,3 +125,16 @@ LabelIdentifier ::= LBL | ID {
     implements  = "com.andreybotanic.asm.nasm.psi.NasmNamedElement"
     methods     = [getName setName getNameIdentifier getReferences]
 }
+
+DataElement ::= LBL_DEF? DataStmt NL*
+DataValue ::= Expr | STRING | FLOAT_DECIMAL | QUESTION
+DataStmt ::= DX DataValue (SEPARATOR DataValue)*
+
+Expr ::= ParenthesisExpr
+       | NumericLiteral
+       | Str
+       ;
+
+ParenthesisExpr ::= ROUND_L Expr ROUND_R { pin=1 extends=Expr }
+NumericLiteral ::= SIZE_TYPE? (BITWISE_NOT|MINUS|PLUS)? (BINARY|ZEROES|HEXADECIMAL|DECIMAL|FLOAT_DECIMAL|CHARACTER) { extends=Expr }
+Str ::= STRING { extends=Expr }

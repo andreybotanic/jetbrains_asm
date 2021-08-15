@@ -5,15 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NasmInstruction extends PsiElement {
+public interface NasmParenthesisExpr extends NasmExpr {
 
   @Nullable
-  NasmOperands getOperands();
-
-  @NotNull
-  NasmOperation getOperation();
-
-  @Nullable
-  PsiElement getComment();
+  NasmExpr getExpr();
 
 }
