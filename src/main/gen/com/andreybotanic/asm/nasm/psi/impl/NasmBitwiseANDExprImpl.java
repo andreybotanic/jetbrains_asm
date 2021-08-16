@@ -8,17 +8,17 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static com.andreybotanic.asm.nasm.psi.NasmTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.andreybotanic.asm.nasm.psi.*;
 
-public class NasmDataValueImpl extends ASTWrapperPsiElement implements NasmDataValue {
+public class NasmBitwiseANDExprImpl extends NasmExprImpl implements NasmBitwiseANDExpr {
 
-  public NasmDataValueImpl(@NotNull ASTNode node) {
+  public NasmBitwiseANDExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull NasmVisitor visitor) {
-    visitor.visitDataValue(this);
+    visitor.visitBitwiseANDExpr(this);
   }
 
   @Override
@@ -28,21 +28,9 @@ public class NasmDataValueImpl extends ASTWrapperPsiElement implements NasmDataV
   }
 
   @Override
-  @Nullable
-  public NasmExpr getExpr() {
-    return findChildByClass(NasmExpr.class);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getFloatDecimal() {
-    return findChildByType(FLOAT_DECIMAL);
-  }
-
-  @Override
-  @Nullable
-  public PsiElement getString() {
-    return findChildByType(STRING);
+  @NotNull
+  public List<NasmExpr> getExprList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, NasmExpr.class);
   }
 
 }

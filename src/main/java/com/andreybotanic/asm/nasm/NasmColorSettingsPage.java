@@ -22,6 +22,7 @@ public class NasmColorSettingsPage implements ColorSettingsPage {
             new AttributesDescriptor("Label", NasmSyntaxHighlighter.LABEL),
             new AttributesDescriptor("Register", NasmSyntaxHighlighter.REGISTER),
             new AttributesDescriptor("String", NasmSyntaxHighlighter.STRING),
+            new AttributesDescriptor("Type size", NasmSyntaxHighlighter.SIZE),
     };
 
     @Override
@@ -39,6 +40,7 @@ public class NasmColorSettingsPage implements ColorSettingsPage {
         return "var: db 'String', 10, 13\n" +
                 "mov eax, 0x01\n" +
                 "xor ax, ax\n" +
+                "cmp cl, byte [var]\n" +
                 ".label:\n" +
                 "add cx, 10h ; comment\n" +
                 "\n" +

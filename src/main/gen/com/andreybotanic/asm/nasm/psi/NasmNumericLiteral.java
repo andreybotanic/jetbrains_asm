@@ -23,6 +23,9 @@ public interface NasmNumericLiteral extends NasmExpr {
   PsiElement getHexadecimal();
 
   @Nullable
+  PsiElement getSizePrefix();
+
+  @Nullable
   PsiElement getZeroes();
 
 }

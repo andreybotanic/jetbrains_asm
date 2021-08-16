@@ -5,15 +5,18 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NasmInstruction extends PsiElement {
-
-  @NotNull
-  List<NasmOperand> getOperandList();
-
-  @NotNull
-  NasmOperation getOperation();
+public interface NasmRegister extends NasmExpr {
 
   @Nullable
-  PsiElement getComment();
+  PsiElement getReg16();
+
+  @Nullable
+  PsiElement getReg32();
+
+  @Nullable
+  PsiElement getReg64();
+
+  @Nullable
+  PsiElement getReg8();
 
 }

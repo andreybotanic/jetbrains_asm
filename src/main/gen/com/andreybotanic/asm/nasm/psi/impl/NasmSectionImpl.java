@@ -11,14 +11,14 @@ import static com.andreybotanic.asm.nasm.psi.NasmTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.andreybotanic.asm.nasm.psi.*;
 
-public class NasmOperandImpl extends ASTWrapperPsiElement implements NasmOperand {
+public class NasmSectionImpl extends ASTWrapperPsiElement implements NasmSection {
 
-  public NasmOperandImpl(@NotNull ASTNode node) {
+  public NasmSectionImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NasmVisitor visitor) {
-    visitor.visitOperand(this);
+    visitor.visitSection(this);
   }
 
   @Override
@@ -28,21 +28,15 @@ public class NasmOperandImpl extends ASTWrapperPsiElement implements NasmOperand
   }
 
   @Override
-  @Nullable
-  public NasmExpr getExpr() {
-    return findChildByClass(NasmExpr.class);
+  @NotNull
+  public PsiElement getSectionDef() {
+    return findNotNullChildByType(SECTION_DEF);
   }
 
   @Override
-  @Nullable
-  public NasmImmediate getImmediate() {
-    return findChildByClass(NasmImmediate.class);
-  }
-
-  @Override
-  @Nullable
-  public NasmMemory getMemory() {
-    return findChildByClass(NasmMemory.class);
+  @NotNull
+  public PsiElement getSectionName() {
+    return findNotNullChildByType(SECTION_NAME);
   }
 
 }

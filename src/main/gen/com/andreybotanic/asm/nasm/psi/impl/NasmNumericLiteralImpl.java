@@ -59,6 +59,12 @@ public class NasmNumericLiteralImpl extends NasmExprImpl implements NasmNumericL
 
   @Override
   @Nullable
+  public PsiElement getSizePrefix() {
+    return findChildByType(SIZE_PREFIX);
+  }
+
+  @Override
+  @Nullable
   public PsiElement getZeroes() {
     return findChildByType(ZEROES);
   }

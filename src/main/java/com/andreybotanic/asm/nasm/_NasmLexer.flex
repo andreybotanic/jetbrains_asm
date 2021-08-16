@@ -25,9 +25,19 @@ import static com.andreybotanic.asm.nasm.psi.NasmTypes.*;
 
 WHITE_SPACE=[ \t\x0B\f]+
 EOL=\R
-DX=[dD][bBwWdDqQtToOyYzZ]
+DATA_DEF=d[bwdqtoyz]
+DATA_RES=res[bwdqtoyz]
 COMMENT=;[^\r\n]*
-REGISTER=[re]?[abcd]x|[abcd][hl]
+SECTION_DEF=section|segment
+SECTION_NAME=\.(text|data|bss)
+DIRECTIVE_OP=(bits |use|code)(16|32)|absolute|external|global|org|align|struc|endstruc|common|cpu|group|uppercase|import|library|module
+END_DIRECTIVE_OP=end
+REG_8=[abcd][hl]
+REG_16=[abcd]x
+REG_32=e[abcd]x
+REG_64=r[abcd]x
+OP_PREFIX=((rep(n?[ez])|rep)|lock|bnd|xacquire|xrelease)
+SIZE_PREFIX=byte|word|dword|qword
 GENERAL_OP=mov|xor|add|inc|dec|jmp
 ID=([a-zA-Z_?]+[a-zA-Z0-9_$.#@~?]*)
 LBL_DEF=([a-zA-Z$._?#@]+[a-zA-Z0-9$._~]*):
@@ -42,60 +52,69 @@ STRING=(`([^`\\]|\\.)*`|'([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")
 
 %%
 <YYINITIAL> {
-  {WHITE_SPACE}        { return WHITE_SPACE; }
+  {WHITE_SPACE}           { return WHITE_SPACE; }
 
-  ":"                  { return COLON; }
-  ";"                  { return SEMICOLON; }
-  "["                  { return SQUARE_L; }
-  "]"                  { return SQUARE_R; }
-  "("                  { return ROUND_L; }
-  ")"                  { return ROUND_R; }
-  ","                  { return SEPARATOR; }
-  "."                  { return DOT; }
-  "?"                  { return QUESTION; }
-  "="                  { return EQUAL; }
-  "=="                 { return EQUALEQUAL; }
-  "!="                 { return NOTEQUAL; }
-  ">"                  { return GREATERTHAN; }
-  "<"                  { return LESSTHAN; }
-  ">="                 { return GREATERTHANOREQUAL; }
-  "<="                 { return LESSTHANOREQUAL; }
-  "+"                  { return PLUS; }
-  "-"                  { return MINUS; }
-  "*"                  { return TIMES; }
-  "/"                  { return DIVIDE; }
-  "<<"                 { return BITSHIFT_L; }
-  ">>"                 { return BITSHIFT_R; }
-  "&"                  { return BITWISE_AND; }
-  "|"                  { return BITWISE_OR; }
-  "^"                  { return BITWISE_XOR; }
-  "~"                  { return BITWISE_NOT; }
-  "&&"                 { return LOGICAL_AND; }
-  "||"                 { return LOGICAL_OR; }
-  "^^"                 { return LOGICAL_XOR; }
-  "$"                  { return DOLLARSIGN; }
-  "$$"                 { return DOLLARSIGN2; }
-  "%"                  { return PERCENT; }
-  "%%"                 { return PERCENT2; }
-  "%+"                 { return TOKEN_CONCAT; }
-  "SIZE_TYPE"          { return SIZE_TYPE; }
+  ":"                     { return COLON; }
+  ";"                     { return SEMICOLON; }
+  "["                     { return SQUARE_L; }
+  "]"                     { return SQUARE_R; }
+  "("                     { return ROUND_L; }
+  ")"                     { return ROUND_R; }
+  ","                     { return SEPARATOR; }
+  "."                     { return DOT; }
+  "?"                     { return QUESTION; }
+  "="                     { return EQUAL; }
+  "=="                    { return EQUALEQUAL; }
+  "!="                    { return NOTEQUAL; }
+  ">"                     { return GREATERTHAN; }
+  "<"                     { return LESSTHAN; }
+  ">="                    { return GREATERTHANOREQUAL; }
+  "<="                    { return LESSTHANOREQUAL; }
+  "+"                     { return PLUS; }
+  "-"                     { return MINUS; }
+  "*"                     { return TIMES; }
+  "/"                     { return DIVIDE; }
+  "<<"                    { return BITSHIFT_L; }
+  ">>"                    { return BITSHIFT_R; }
+  "&"                     { return BITWISE_AND; }
+  "|"                     { return BITWISE_OR; }
+  "^"                     { return BITWISE_XOR; }
+  "~"                     { return BITWISE_NOT; }
+  "&&"                    { return LOGICAL_AND; }
+  "||"                    { return LOGICAL_OR; }
+  "^^"                    { return LOGICAL_XOR; }
+  "$"                     { return DOLLARSIGN; }
+  "$$"                    { return DOLLARSIGN2; }
+  "%"                     { return PERCENT; }
+  "%%"                    { return PERCENT2; }
+  "%+"                    { return TOKEN_CONCAT; }
 
-  {WHITE_SPACE}        { return WHITE_SPACE; }
-  {EOL}                { return EOL; }
-  {DX}                 { return DX; }
-  {COMMENT}            { return COMMENT; }
-  {REGISTER}           { return REGISTER; }
-  {GENERAL_OP}         { return GENERAL_OP; }
-  {ID}                 { return ID; }
-  {LBL_DEF}            { return LBL_DEF; }
-  {LBL}                { return LBL; }
-  {BINARY}             { return BINARY; }
-  {HEXADECIMAL}        { return HEXADECIMAL; }
-  {ZEROES}             { return ZEROES; }
-  {DECIMAL}            { return DECIMAL; }
-  {FLOAT_DECIMAL}      { return FLOAT_DECIMAL; }
-  {CHARACTER}          { return CHARACTER; }
-  {STRING}             { return STRING; }
+  {WHITE_SPACE}           { return WHITE_SPACE; }
+  {EOL}                   { return EOL; }
+  {DATA_DEF}              { return DATA_DEF; }
+  {DATA_RES}              { return DATA_RES; }
+  {COMMENT}               { return COMMENT; }
+  {SECTION_DEF}           { return SECTION_DEF; }
+  {SECTION_NAME}          { return SECTION_NAME; }
+  {DIRECTIVE_OP}          { return DIRECTIVE_OP; }
+  {END_DIRECTIVE_OP}      { return END_DIRECTIVE_OP; }
+  {REG_8}                 { return REG_8; }
+  {REG_16}                { return REG_16; }
+  {REG_32}                { return REG_32; }
+  {REG_64}                { return REG_64; }
+  {OP_PREFIX}             { return OP_PREFIX; }
+  {SIZE_PREFIX}           { return SIZE_PREFIX; }
+  {GENERAL_OP}            { return GENERAL_OP; }
+  {ID}                    { return ID; }
+  {LBL_DEF}               { return LBL_DEF; }
+  {LBL}                   { return LBL; }
+  {BINARY}                { return BINARY; }
+  {HEXADECIMAL}           { return HEXADECIMAL; }
+  {ZEROES}                { return ZEROES; }
+  {DECIMAL}               { return DECIMAL; }
+  {FLOAT_DECIMAL}         { return FLOAT_DECIMAL; }
+  {CHARACTER}             { return CHARACTER; }
+  {STRING}                { return STRING; }
 
 }
 

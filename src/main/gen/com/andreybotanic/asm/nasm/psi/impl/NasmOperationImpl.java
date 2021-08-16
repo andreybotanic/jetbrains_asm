@@ -8,15 +8,15 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static com.andreybotanic.asm.nasm.psi.NasmTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.andreybotanic.asm.nasm.psi.*;
 
-public class NasmOperationImpl extends ASTWrapperPsiElement implements NasmOperation {
+public class NasmOperationImpl extends NasmExprImpl implements NasmOperation {
 
   public NasmOperationImpl(@NotNull ASTNode node) {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull NasmVisitor visitor) {
     visitor.visitOperation(this);
   }

@@ -28,9 +28,9 @@ public class NasmInstructionImpl extends ASTWrapperPsiElement implements NasmIns
   }
 
   @Override
-  @Nullable
-  public NasmOperands getOperands() {
-    return findChildByClass(NasmOperands.class);
+  @NotNull
+  public List<NasmOperand> getOperandList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, NasmOperand.class);
   }
 
   @Override

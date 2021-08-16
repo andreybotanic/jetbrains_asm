@@ -5,15 +5,12 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NasmInstruction extends PsiElement {
+public interface NasmDirective extends PsiElement {
 
   @NotNull
-  List<NasmOperand> getOperandList();
+  List<NasmExpr> getExprList();
 
   @NotNull
-  NasmOperation getOperation();
-
-  @Nullable
-  PsiElement getComment();
+  PsiElement getDirectiveOp();
 
 }

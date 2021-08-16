@@ -26,6 +26,8 @@ public class NasmSyntaxHighlighter extends SyntaxHighlighterBase {
             createTextAttributesKey("NASM_OPERATION", DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey REGISTER =
             createTextAttributesKey("NASM_REGISTER", DefaultLanguageHighlighterColors.KEYWORD);
+    public static final TextAttributesKey SIZE =
+            createTextAttributesKey("NASM_SIZE", DefaultLanguageHighlighterColors.NUMBER);
     public static final TextAttributesKey LABEL =
             createTextAttributesKey("NASM_LABEL", DefaultLanguageHighlighterColors.IDENTIFIER);
     public static final TextAttributesKey STRING =
@@ -37,15 +39,21 @@ public class NasmSyntaxHighlighter extends SyntaxHighlighterBase {
     static {
         AttributesKeys = new THashMap<>();
         
-        AttributesKeys.put(NasmTypes.REGISTER, REGISTER);
+        AttributesKeys.put(NasmTypes.REG_8, REGISTER);
+        AttributesKeys.put(NasmTypes.REG_16, REGISTER);
+        AttributesKeys.put(NasmTypes.REG_32, REGISTER);
+        AttributesKeys.put(NasmTypes.REG_64, REGISTER);
 
         AttributesKeys.put(NasmTypes.GENERAL_OP, OPERATION);
-        AttributesKeys.put(NasmTypes.DX, OPERATION);
+        AttributesKeys.put(NasmTypes.DATA_DEF, OPERATION);
+        AttributesKeys.put(NasmTypes.DATA_RES, OPERATION);
+        AttributesKeys.put(NasmTypes.SECTION_DEF, OPERATION);
+        AttributesKeys.put(NasmTypes.SECTION_NAME, OPERATION);
+        AttributesKeys.put(NasmTypes.DIRECTIVE_OP, OPERATION);
 
         AttributesKeys.put(NasmTypes.STRING, STRING);
         AttributesKeys.put(NasmTypes.CHARACTER, STRING);
 
-        AttributesKeys.put(NasmTypes.NUMERIC_LITERAL, NUMBER);
         AttributesKeys.put(NasmTypes.ZEROES, NUMBER);
         AttributesKeys.put(NasmTypes.BINARY, NUMBER);
         AttributesKeys.put(NasmTypes.DECIMAL, NUMBER);
@@ -54,7 +62,9 @@ public class NasmSyntaxHighlighter extends SyntaxHighlighterBase {
 
         AttributesKeys.put(NasmTypes.LBL, LABEL);
         AttributesKeys.put(NasmTypes.LBL_DEF, LABEL);
-        AttributesKeys.put(NasmTypes.IDENTIFIER, LABEL);
+        AttributesKeys.put(NasmTypes.ID, LABEL);
+
+        AttributesKeys.put(NasmTypes.SIZE_PREFIX, SIZE);
 
         AttributesKeys.put(NasmTypes.COMMENT, COMMENT);
         AttributesKeys.put(NasmTypes.SEMICOLON, COMMENT);

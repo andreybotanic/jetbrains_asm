@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NasmOperation extends PsiElement {
+public interface NasmOperation extends NasmExpr {
 
   @NotNull
   PsiElement getGeneralOp();

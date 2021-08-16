@@ -6,7 +6,7 @@ import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
 
-public interface NasmLabelIdentifier extends NasmNamedElement {
+public interface NasmLabelIdentifier extends NasmExpr, NasmNamedElement {
 
   @Nullable
   PsiElement getId();

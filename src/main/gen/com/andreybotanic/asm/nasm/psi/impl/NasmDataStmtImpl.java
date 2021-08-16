@@ -28,15 +28,15 @@ public class NasmDataStmtImpl extends ASTWrapperPsiElement implements NasmDataSt
   }
 
   @Override
-  @NotNull
-  public List<NasmDataValue> getDataValueList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, NasmDataValue.class);
+  @Nullable
+  public NasmDataDefStmt getDataDefStmt() {
+    return findChildByClass(NasmDataDefStmt.class);
   }
 
   @Override
-  @NotNull
-  public PsiElement getDx() {
-    return findNotNullChildByType(DX);
+  @Nullable
+  public NasmDataResStmt getDataResStmt() {
+    return findChildByClass(NasmDataResStmt.class);
   }
 
 }

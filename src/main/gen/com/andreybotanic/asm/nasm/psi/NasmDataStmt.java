@@ -7,10 +7,10 @@ import com.intellij.psi.PsiElement;
 
 public interface NasmDataStmt extends PsiElement {
 
-  @NotNull
-  List<NasmDataValue> getDataValueList();
+  @Nullable
+  NasmDataDefStmt getDataDefStmt();
 
-  @NotNull
-  PsiElement getDx();
+  @Nullable
+  NasmDataResStmt getDataResStmt();
 
 }

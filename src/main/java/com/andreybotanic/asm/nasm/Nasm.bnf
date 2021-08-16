@@ -20,19 +20,28 @@
     WHITE_SPACE         = 'regexp:[ \t\x0B\f]+'
     EOL                 = 'regexp:\R'
 
-    DX                  = 'regexp:(?i)[d][bwdqtoyz]'
+    DATA_DEF            = 'regexp:d[bwdqtoyz]'
+    DATA_RES            = 'regexp:res[bwdqtoyz]'
 
     COMMENT             = 'regexp:;[^\r\n]*'
 
-    SECTION_DEF         = 'regexp:(?i)section|segment'
-    SECTION_NAME        = 'regexp:(?i)\.(text|data|bss)'
+    SECTION_DEF         = 'regexp:section|segment'
+    SECTION_NAME        = 'regexp:\.(text|data|bss)'
 
-    DIRECTIVE_OP        = 'regexp:(?i)(bits |use|code)(16|32)|absolute|external|global|org|align|struc|endstruc|common|cpu|group|uppercase|import|library|module'
-    END_DIRECTIVE_OP    = 'regexp:(?i)end'
+    DIRECTIVE_OP        = 'regexp:(bits |use|code)(16|32)|absolute|external|global|org|align|struc|endstruc|common|cpu|group|uppercase|import|library|module'
+    END_DIRECTIVE_OP    = 'regexp:end'
 
-    REGISTER            = 'regexp:(?i)[re]?[abcd]x|[abcd][hl]'
+    // Registers
+    REG_8               = 'regexp:[abcd][hl]'
+    REG_16              = 'regexp:[abcd]x'
+    REG_32              = 'regexp:e[abcd]x'
+    REG_64              = 'regexp:r[abcd]x'
 
-    GENERAL_OP          = 'regexp:(?i)mov|xor|add|inc|dec|jmp'
+    // Instruction operation prefixes
+    OP_PREFIX           = 'regexp:((rep(n?[ez])|rep)|lock|bnd|xacquire|xrelease)'
+    SIZE_PREFIX         = 'regexp:byte|word|dword|qword'
+
+    GENERAL_OP          = 'regexp:mov|xor|add|inc|dec|jmp'
 
     // Make last!
     ID                  = 'regexp:([a-zA-Z_?]+[a-zA-Z0-9_$.#@~?]*)' // Some identifier
@@ -87,6 +96,8 @@
     TOKEN_CONCAT        = '%+'
 
   ]
+
+  extends(".*Expr") = Expr
 }
 
 NasmFile ::= item_*
@@ -103,17 +114,23 @@ private item_ ::= COMMENT
 
 Section ::= SECTION_DEF SECTION_NAME
 
+Immediate ::= Expr | Str
+Memory ::= Identifier | Address
+Address ::= SIZE_PREFIX? AddressInternal { extends=Expr }
+private AddressInternal ::= SQUARE_L MINUS? Expr SQUARE_R { pin(".*")=1  }
+
+Register ::= REG_8 | REG_16 | REG_32 | REG_64 { extends=Expr }
+
 Instruction ::= Operation Operands? COMMENT? (<<eof>> | EOL+)?
 
-Operation ::= GENERAL_OP
+Operation ::= GENERAL_OP { extends=Expr }
 
-Operands ::= Operand (SEPARATOR Operand)* { pin=1 recoverWhile=OperandRecover }
+private Operands ::= Operand (SEPARATOR Operand)* { pin=1 recoverWhile=OperandRecover }
 private OperandRecover ::= !(COMMENT | EOL)
 
-Operand ::= REGISTER
-          | (BINARY | DECIMAL | HEXADECIMAL | FLOAT_DECIMAL)
-          | STRING
-          | CHARACTER
+Operand ::= Register
+          | Immediate
+          | Memory
           | Identifier
           | LabelIdentifier
           ;
@@ -128,17 +145,20 @@ Identifier ::= ID {
     mixin       = "com.andreybotanic.asm.nasm.psi.impl.NasmNamedElementImpl"
     implements  = "com.andreybotanic.asm.nasm.psi.NasmNamedElement"
     methods     = [getName setName getNameIdentifier getReferences]
+    extends     = Expr
 }
 
 LabelIdentifier ::= LBL | ID {
     mixin       = "com.andreybotanic.asm.nasm.psi.impl.NasmNamedElementImpl"
     implements  = "com.andreybotanic.asm.nasm.psi.NasmNamedElement"
     methods     = [getName setName getNameIdentifier getReferences]
+    extends     = Expr
 }
 
 DataElement ::= LBL_DEF? DataStmt EOL*
-DataValue ::= Expr | STRING | FLOAT_DECIMAL | QUESTION
-DataStmt ::= DX DataValue (SEPARATOR DataValue)* { pin=2 recoverWhile=DataValueRecover }
+DataDefStmt ::= DATA_DEF Expr (SEPARATOR Expr)* { pin=1 recoverWhile=DataValueRecover }
+DataResStmt ::= DATA_RES Expr
+DataStmt ::= DataResStmt | DataDefStmt
 private DataValueRecover ::= !(COMMENT | EOL)
 
 Directive ::= (DirectiveDecl|DirectiveDeclBrackets) EOL*
@@ -146,10 +166,45 @@ private DirectiveDecl ::= DIRECTIVE_OP (Expr SEPARATOR?)*
 private DirectiveDeclBrackets ::= SQUARE_L DIRECTIVE_OP Expr* SQUARE_R
 
 Expr ::= ParenthesisExpr
+       | MulGroupExpr
+       | PlusGroupExpr
+       | ModulusExpr
+       | BitShiftGroupExpr
+       | BitwiseANDExpr
+       | BitwiseORExpr
+       | BitwiseXORExpr
+       | BitwiseNOTExpr
+       | LogicalANDExpr
+       | LogicalORExpr
+       | LogicalXORExpr
        | NumericLiteral
        | Str
+       | Address
+       | Register
+       | Operation
+       | Identifier
+       | LabelIdentifier
        ;
 
-ParenthesisExpr ::= ROUND_L Expr ROUND_R { pin=1 extends=Expr }
-NumericLiteral ::= SIZE_TYPE? (BITWISE_NOT|MINUS|PLUS)? (BINARY|ZEROES|HEXADECIMAL|DECIMAL|FLOAT_DECIMAL|CHARACTER) { extends=Expr }
+ParenthesisExpr ::= ROUND_L Expr ROUND_R { pin(".*")=1 }
+
+MulExpr ::= Expr TIMES Expr
+DivExpr ::= Expr DIVIDE Expr
+private MulGroupExpr ::= MulExpr | DivExpr
+PlusExpr ::= Expr PLUS Expr
+MinusExpr ::= Expr MINUS Expr
+private PlusGroupExpr ::= PlusExpr | MinusExpr
+ModulusExpr ::= Expr PERCENT Expr
+BitShiftLExpr ::= Expr BITSHIFT_L Expr
+BitShiftRExpr ::= Expr BITSHIFT_R Expr
+private BitShiftGroupExpr ::= BitShiftLExpr | BitShiftRExpr
+BitwiseANDExpr ::= Expr BITWISE_AND Expr
+BitwiseORExpr ::= Expr BITWISE_OR Expr
+BitwiseXORExpr ::= Expr BITWISE_XOR Expr
+BitwiseNOTExpr ::= BITWISE_NOT Expr
+LogicalANDExpr ::= Expr LOGICAL_AND Expr
+LogicalORExpr ::= Expr LOGICAL_OR Expr
+LogicalXORExpr ::= Expr LOGICAL_XOR Expr
+
+NumericLiteral ::= SIZE_PREFIX? (BITWISE_NOT|MINUS|PLUS)? (BINARY|ZEROES|HEXADECIMAL|DECIMAL|FLOAT_DECIMAL|CHARACTER) { extends=Expr }
 Str ::= STRING { extends=Expr }

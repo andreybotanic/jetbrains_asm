@@ -8,17 +8,17 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 import static com.andreybotanic.asm.nasm.psi.NasmTypes.*;
-import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.andreybotanic.asm.nasm.psi.*;
 
-public class NasmOperandImpl extends ASTWrapperPsiElement implements NasmOperand {
+public class NasmRegisterImpl extends NasmExprImpl implements NasmRegister {
 
-  public NasmOperandImpl(@NotNull ASTNode node) {
+  public NasmRegisterImpl(@NotNull ASTNode node) {
     super(node);
   }
 
+  @Override
   public void accept(@NotNull NasmVisitor visitor) {
-    visitor.visitOperand(this);
+    visitor.visitRegister(this);
   }
 
   @Override
@@ -29,20 +29,26 @@ public class NasmOperandImpl extends ASTWrapperPsiElement implements NasmOperand
 
   @Override
   @Nullable
-  public NasmExpr getExpr() {
-    return findChildByClass(NasmExpr.class);
+  public PsiElement getReg16() {
+    return findChildByType(REG_16);
   }
 
   @Override
   @Nullable
-  public NasmImmediate getImmediate() {
-    return findChildByClass(NasmImmediate.class);
+  public PsiElement getReg32() {
+    return findChildByType(REG_32);
   }
 
   @Override
   @Nullable
-  public NasmMemory getMemory() {
-    return findChildByClass(NasmMemory.class);
+  public PsiElement getReg64() {
+    return findChildByType(REG_64);
+  }
+
+  @Override
+  @Nullable
+  public PsiElement getReg8() {
+    return findChildByType(REG_8);
   }
 
 }
