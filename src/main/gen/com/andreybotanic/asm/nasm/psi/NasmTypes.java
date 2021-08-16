@@ -56,7 +56,6 @@ public interface NasmTypes {
   IElementType LOGICAL_OR = new NasmTokenType("||");
   IElementType LOGICAL_XOR = new NasmTokenType("^^");
   IElementType MINUS = new NasmTokenType("-");
-  IElementType NL = new NasmTokenType("NL");
   IElementType NOTEQUAL = new NasmTokenType("!=");
   IElementType PERCENT = new NasmTokenType("%");
   IElementType PERCENT2 = new NasmTokenType("%%");

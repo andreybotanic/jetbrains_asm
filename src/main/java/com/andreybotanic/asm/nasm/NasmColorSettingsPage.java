@@ -20,7 +20,8 @@ public class NasmColorSettingsPage implements ColorSettingsPage {
             new AttributesDescriptor("Number", NasmSyntaxHighlighter.NUMBER),
             new AttributesDescriptor("NASM mnemonic", NasmSyntaxHighlighter.OPERATION),
             new AttributesDescriptor("Label", NasmSyntaxHighlighter.LABEL),
-            new AttributesDescriptor("Register", NasmSyntaxHighlighter.REGISTER)
+            new AttributesDescriptor("Register", NasmSyntaxHighlighter.REGISTER),
+            new AttributesDescriptor("String", NasmSyntaxHighlighter.STRING),
     };
 
     @Override
@@ -35,7 +36,8 @@ public class NasmColorSettingsPage implements ColorSettingsPage {
 
     @Override
     public @NonNls @NotNull String getDemoText() {
-        return "mov eax, 0x01\n" +
+        return "var: db 'String', 10, 13\n" +
+                "mov eax, 0x01\n" +
                 "xor ax, ax\n" +
                 ".label:\n" +
                 "add cx, 10h ; comment\n" +

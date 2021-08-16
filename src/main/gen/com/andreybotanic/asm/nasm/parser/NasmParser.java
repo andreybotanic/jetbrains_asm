@@ -40,7 +40,7 @@ public class NasmParser implements PsiParser, LightPsiParser {
   };
 
   /* ********************************************************** */
-  // LBL_DEF? DataStmt NL*
+  // LBL_DEF? DataStmt EOL*
   public static boolean DataElement(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "DataElement")) return false;
     if (!nextTokenIs(b, "<data element>", DX, LBL_DEF)) return false;
@@ -60,12 +60,12 @@ public class NasmParser implements PsiParser, LightPsiParser {
     return true;
   }
 
-  // NL*
+  // EOL*
   private static boolean DataElement_2(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "DataElement_2")) return false;
     while (true) {
       int c = current_position_(b);
-      if (!consumeToken(b, NL)) break;
+      if (!consumeToken(b, EOL)) break;
       if (!empty_element_parsed_guard_(b, "DataElement_2", c)) break;
     }
     return true;
@@ -75,14 +75,14 @@ public class NasmParser implements PsiParser, LightPsiParser {
   // DX DataValue (SEPARATOR DataValue)*
   public static boolean DataStmt(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "DataStmt")) return false;
-    if (!nextTokenIs(b, DX)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, DATA_STMT, "<data stmt>");
     r = consumeToken(b, DX);
     r = r && DataValue(b, l + 1);
+    p = r; // pin = 2
     r = r && DataStmt_2(b, l + 1);
-    exit_section_(b, m, DATA_STMT, r);
-    return r;
+    exit_section_(b, l, m, r, p, NasmParser::DataValueRecover);
+    return r || p;
   }
 
   // (SEPARATOR DataValue)*
@@ -118,6 +118,26 @@ public class NasmParser implements PsiParser, LightPsiParser {
     if (!r) r = consumeToken(b, FLOAT_DECIMAL);
     if (!r) r = consumeToken(b, QUESTION);
     exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // !(COMMENT | EOL)
+  static boolean DataValueRecover(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "DataValueRecover")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NOT_);
+    r = !DataValueRecover_0(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // COMMENT | EOL
+  private static boolean DataValueRecover_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "DataValueRecover_0")) return false;
+    boolean r;
+    r = consumeToken(b, COMMENT);
+    if (!r) r = consumeToken(b, EOL);
     return r;
   }
 
@@ -311,11 +331,11 @@ public class NasmParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // REGISTER
-  //             | (BINARY | DECIMAL | HEXADECIMAL | FLOAT_DECIMAL)
-  //             | STRING
-  //             | CHARACTER
-  //             | Identifier
-  //             | LabelIdentifier
+  //           | (BINARY | DECIMAL | HEXADECIMAL | FLOAT_DECIMAL)
+  //           | STRING
+  //           | CHARACTER
+  //           | Identifier
+  //           | LabelIdentifier
   public static boolean Operand(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Operand")) return false;
     boolean r;
@@ -342,15 +362,36 @@ public class NasmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // !(COMMENT | EOL)
+  static boolean OperandRecover(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "OperandRecover")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NOT_);
+    r = !OperandRecover_0(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // COMMENT | EOL
+  private static boolean OperandRecover_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "OperandRecover_0")) return false;
+    boolean r;
+    r = consumeToken(b, COMMENT);
+    if (!r) r = consumeToken(b, EOL);
+    return r;
+  }
+
+  /* ********************************************************** */
   // Operand (SEPARATOR Operand)*
   public static boolean Operands(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Operands")) return false;
-    boolean r;
+    boolean r, p;
     Marker m = enter_section_(b, l, _NONE_, OPERANDS, "<operands>");
     r = Operand(b, l + 1);
+    p = r; // pin = 1
     r = r && Operands_1(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
+    exit_section_(b, l, m, r, p, NasmParser::OperandRecover);
+    return r || p;
   }
 
   // (SEPARATOR Operand)*

@@ -78,7 +78,6 @@ STRING=(`([^`\\]|\\.)*`|'([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")
   "%"                  { return PERCENT; }
   "%%"                 { return PERCENT2; }
   "%+"                 { return TOKEN_CONCAT; }
-  "NL"                 { return NL; }
   "SIZE_TYPE"          { return SIZE_TYPE; }
 
   {WHITE_SPACE}        { return WHITE_SPACE; }

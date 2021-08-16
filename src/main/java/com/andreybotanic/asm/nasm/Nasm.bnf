@@ -98,15 +98,16 @@ Instruction ::= Operation Operands? COMMENT? (<<eof>> | EOL+)?
 
 Operation ::= GENERAL_OP
 
-Operands ::= Operand (SEPARATOR Operand)*
+Operands ::= Operand (SEPARATOR Operand)* { pin=1 recoverWhile=OperandRecover }
+private OperandRecover ::= !(COMMENT | EOL)
 
 Operand ::= REGISTER
-            | (BINARY | DECIMAL | HEXADECIMAL | FLOAT_DECIMAL)
-            | STRING
-            | CHARACTER
-            | Identifier
-            | LabelIdentifier
-            ;
+          | (BINARY | DECIMAL | HEXADECIMAL | FLOAT_DECIMAL)
+          | STRING
+          | CHARACTER
+          | Identifier
+          | LabelIdentifier
+          ;
 
 Label ::= LBL_DEF EOL* {
     mixin       = "com.andreybotanic.asm.nasm.psi.impl.NasmNamedElementImpl"
@@ -126,9 +127,10 @@ LabelIdentifier ::= LBL | ID {
     methods     = [getName setName getNameIdentifier getReferences]
 }
 
-DataElement ::= LBL_DEF? DataStmt NL*
+DataElement ::= LBL_DEF? DataStmt EOL*
 DataValue ::= Expr | STRING | FLOAT_DECIMAL | QUESTION
-DataStmt ::= DX DataValue (SEPARATOR DataValue)*
+DataStmt ::= DX DataValue (SEPARATOR DataValue)* { pin=2 recoverWhile=DataValueRecover }
+private DataValueRecover ::= !(COMMENT | EOL)
 
 Expr ::= ParenthesisExpr
        | NumericLiteral
