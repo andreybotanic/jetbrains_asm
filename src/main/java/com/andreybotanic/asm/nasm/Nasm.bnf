@@ -20,14 +20,19 @@
     WHITE_SPACE         = 'regexp:[ \t\x0B\f]+'
     EOL                 = 'regexp:\R'
 
-    //DATA_OP             = 'regexp:([rR][eE][sS][bBwWdDqQtToOyYzZ]|[dD][bBwWdDqQtToOyYzZ]|[tT][iI][mM][eE][sS])'
-    DX                  = 'regexp:[dD][bBwWdDqQtToOyYzZ]'
+    DX                  = 'regexp:(?i)[d][bwdqtoyz]'
 
     COMMENT             = 'regexp:;[^\r\n]*'
 
-    REGISTER            = 'regexp:[re]?[abcd]x|[abcd][hl]'
+    SECTION_DEF         = 'regexp:(?i)section|segment'
+    SECTION_NAME        = 'regexp:(?i)\.(text|data|bss)'
 
-    GENERAL_OP          = 'regexp:mov|xor|add|inc|dec|jmp'
+    DIRECTIVE_OP        = 'regexp:(?i)(bits |use|code)(16|32)|absolute|external|global|org|align|struc|endstruc|common|cpu|group|uppercase|import|library|module'
+    END_DIRECTIVE_OP    = 'regexp:(?i)end'
+
+    REGISTER            = 'regexp:(?i)[re]?[abcd]x|[abcd][hl]'
+
+    GENERAL_OP          = 'regexp:(?i)mov|xor|add|inc|dec|jmp'
 
     // Make last!
     ID                  = 'regexp:([a-zA-Z_?]+[a-zA-Z0-9_$.#@~?]*)' // Some identifier
@@ -87,12 +92,16 @@
 NasmFile ::= item_*
 
 private item_ ::= COMMENT
+                | Section
                 | Label
+                | Directive
                 | Instruction
                 | DataElement
                 | EOL
                 | ID
                 ;
+
+Section ::= SECTION_DEF SECTION_NAME
 
 Instruction ::= Operation Operands? COMMENT? (<<eof>> | EOL+)?
 
@@ -131,6 +140,10 @@ DataElement ::= LBL_DEF? DataStmt EOL*
 DataValue ::= Expr | STRING | FLOAT_DECIMAL | QUESTION
 DataStmt ::= DX DataValue (SEPARATOR DataValue)* { pin=2 recoverWhile=DataValueRecover }
 private DataValueRecover ::= !(COMMENT | EOL)
+
+Directive ::= (DirectiveDecl|DirectiveDeclBrackets) EOL*
+private DirectiveDecl ::= DIRECTIVE_OP (Expr SEPARATOR?)*
+private DirectiveDeclBrackets ::= SQUARE_L DIRECTIVE_OP Expr* SQUARE_R
 
 Expr ::= ParenthesisExpr
        | NumericLiteral
