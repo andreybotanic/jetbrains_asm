@@ -20,6 +20,11 @@
     WHITE_SPACE         = 'regexp:[ \t\x0B\f]+'
     EOL                 = 'regexp:\R'
 
+    // Preprocessor tags
+    INCLUDE_TAG         = 'regexp:([#%](\s+)?)([iI][nN][cC][lL][uU][dD][eE])'
+    DEFINE_TAG          = 'regexp:([#%](\s+)?)(([xX]|[iI])?[dD][eE][fF][iI][nN][eE])'
+    ASSIGN_TAG          = 'regexp:([#%](\s+)?)([iI]?[aA][sS][sS][iI][gG][nN])'
+
     DATA_DEF            = 'regexp:d[bwdqtoyz]'
     DATA_RES            = 'regexp:res[bwdqtoyz]'
 
@@ -105,12 +110,19 @@ NasmFile ::= item_*
 private item_ ::= COMMENT
                 | Section
                 | Label
+                | Preprocessor
                 | Directive
                 | Instruction
                 | DataElement
                 | EOL
                 | ID
                 ;
+
+Preprocessor ::= Include
+               | Assign
+               ;
+Include ::= INCLUDE_TAG STRING
+Assign ::= ASSIGN_TAG Identifier Expr
 
 Section ::= SECTION_DEF SECTION_NAME
 
