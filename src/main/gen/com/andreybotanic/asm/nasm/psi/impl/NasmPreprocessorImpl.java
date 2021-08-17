@@ -11,14 +11,14 @@ import static com.andreybotanic.asm.nasm.psi.NasmTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import com.andreybotanic.asm.nasm.psi.*;
 
-public class NasmDataElementImpl extends ASTWrapperPsiElement implements NasmDataElement {
+public class NasmPreprocessorImpl extends ASTWrapperPsiElement implements NasmPreprocessor {
 
-  public NasmDataElementImpl(@NotNull ASTNode node) {
+  public NasmPreprocessorImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull NasmVisitor visitor) {
-    visitor.visitDataElement(this);
+    visitor.visitPreprocessor(this);
   }
 
   @Override
@@ -29,20 +29,20 @@ public class NasmDataElementImpl extends ASTWrapperPsiElement implements NasmDat
 
   @Override
   @Nullable
-  public NasmDataDefStmt getDataDefStmt() {
-    return findChildByClass(NasmDataDefStmt.class);
+  public NasmAssign getAssign() {
+    return findChildByClass(NasmAssign.class);
   }
 
   @Override
   @Nullable
-  public NasmDataResStmt getDataResStmt() {
-    return findChildByClass(NasmDataResStmt.class);
+  public NasmDefine getDefine() {
+    return findChildByClass(NasmDefine.class);
   }
 
   @Override
   @Nullable
-  public PsiElement getLblDef() {
-    return findChildByType(LBL_DEF);
+  public NasmInclude getInclude() {
+    return findChildByClass(NasmInclude.class);
   }
 
 }

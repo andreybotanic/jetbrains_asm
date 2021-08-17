@@ -5,12 +5,12 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NasmDataStmt extends PsiElement {
+public interface NasmInclude extends PsiElement {
 
-  @Nullable
-  NasmDataDefStmt getDataDefStmt();
+  @NotNull
+  PsiElement getIncludeTag();
 
-  @Nullable
-  NasmDataResStmt getDataResStmt();
+  @NotNull
+  PsiElement getString();
 
 }

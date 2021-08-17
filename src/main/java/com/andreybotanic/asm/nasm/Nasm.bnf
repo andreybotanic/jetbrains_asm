@@ -21,12 +21,12 @@
     EOL                 = 'regexp:\R'
 
     // Preprocessor tags
-    INCLUDE_TAG         = 'regexp:([#%](\s+)?)([iI][nN][cC][lL][uU][dD][eE])'
-    DEFINE_TAG          = 'regexp:([#%](\s+)?)(([xX]|[iI])?[dD][eE][fF][iI][nN][eE])'
-    ASSIGN_TAG          = 'regexp:([#%](\s+)?)([iI]?[aA][sS][sS][iI][gG][nN])'
+    INCLUDE_TAG         = 'regexp:(%(\s+)?)([iI][nN][cC][lL][uU][dD][eE])'
+    DEFINE_TAG          = 'regexp:(%(\s+)?)(([xX]|[iI])?[dD][eE][fF][iI][nN][eE])'
+    ASSIGN_TAG          = 'regexp:(%(\s+)?)([iI]?[aA][sS][sS][iI][gG][nN])'
 
-    DATA_DEF            = 'regexp:d[bwdqtoyz]'
-    DATA_RES            = 'regexp:res[bwdqtoyz]'
+    DATA_DEF            = 'regexp:[dD][bBwWdDqQtToOyYzZ]'
+    DATA_RES            = 'regexp:[rR][eE][sS][bBwWdDqQtToOyYzZ]'
 
     COMMENT             = 'regexp:;[^\r\n]*'
 
@@ -37,10 +37,10 @@
     END_DIRECTIVE_OP    = 'regexp:end'
 
     // Registers
-    REG_8               = 'regexp:[abcd][hl]'
-    REG_16              = 'regexp:[abcd]x'
-    REG_32              = 'regexp:e[abcd]x'
-    REG_64              = 'regexp:r[abcd]x'
+    REG_8               = 'regexp:[aAbBcCdD][hHlL]'
+    REG_16              = 'regexp:[aAbBcCdD][xX]'
+    REG_32              = 'regexp:[eE][aAbBcCdD][xX]'
+    REG_64              = 'regexp:[rR][aAbBcCdD][xX]'
 
     // Instruction operation prefixes
     OP_PREFIX           = 'regexp:((rep(n?[ez])|rep)|lock|bnd|xacquire|xrelease)'
@@ -119,9 +119,15 @@ private item_ ::= COMMENT
                 ;
 
 Preprocessor ::= Include
+               | Define
                | Assign
                ;
 Include ::= INCLUDE_TAG STRING
+Define ::= (DEFINE_TAG Identifier DefineParams Expr )
+         | (DEFINE_TAG Identifier Expr) { pin=1 recoverWhile=DefineRecover }
+DefineParams ::= ROUND_L Identifier (SEPARATOR Identifier)* ROUND_R { pin=1 recoverWhile=DefineParamsRecover }
+private DefineRecover ::= !(EOL | COMMENT)
+private DefineParamsRecover ::= !(EOL | COMMENT | Expr)
 Assign ::= ASSIGN_TAG Identifier Expr
 
 Section ::= SECTION_DEF SECTION_NAME
@@ -170,7 +176,7 @@ LabelIdentifier ::= LBL | ID {
 DataElement ::= LBL_DEF? DataStmt EOL*
 DataDefStmt ::= DATA_DEF Expr (SEPARATOR Expr)* { pin=1 recoverWhile=DataValueRecover }
 DataResStmt ::= DATA_RES Expr
-DataStmt ::= DataResStmt | DataDefStmt
+private DataStmt ::= DataResStmt | DataDefStmt
 private DataValueRecover ::= !(COMMENT | EOL)
 
 Directive ::= (DirectiveDecl|DirectiveDeclBrackets) EOL*

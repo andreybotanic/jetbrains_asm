@@ -25,17 +25,20 @@ import static com.andreybotanic.asm.nasm.psi.NasmTypes.*;
 
 WHITE_SPACE=[ \t\x0B\f]+
 EOL=\R
-DATA_DEF=d[bwdqtoyz]
-DATA_RES=res[bwdqtoyz]
+INCLUDE_TAG=(%([ \t\n\x0B\f\r]+)?)([iI][nN][cC][lL][uU][dD][eE])
+DEFINE_TAG=(%([ \t\n\x0B\f\r]+)?)(([xX]|[iI])?[dD][eE][fF][iI][nN][eE])
+ASSIGN_TAG=(%([ \t\n\x0B\f\r]+)?)([iI]?[aA][sS][sS][iI][gG][nN])
+DATA_DEF=[dD][bBwWdDqQtToOyYzZ]
+DATA_RES=[rR][eE][sS][bBwWdDqQtToOyYzZ]
 COMMENT=;[^\r\n]*
 SECTION_DEF=section|segment
 SECTION_NAME=\.(text|data|bss)
 DIRECTIVE_OP=(bits |use|code)(16|32)|absolute|external|global|org|align|struc|endstruc|common|cpu|group|uppercase|import|library|module
 END_DIRECTIVE_OP=end
-REG_8=[abcd][hl]
-REG_16=[abcd]x
-REG_32=e[abcd]x
-REG_64=r[abcd]x
+REG_8=[aAbBcCdD][hHlL]
+REG_16=[aAbBcCdD][xX]
+REG_32=[eE][aAbBcCdD][xX]
+REG_64=[rR][aAbBcCdD][xX]
 OP_PREFIX=((rep(n?[ez])|rep)|lock|bnd|xacquire|xrelease)
 SIZE_PREFIX=byte|word|dword|qword
 GENERAL_OP=mov|xor|add|inc|dec|jmp
@@ -91,6 +94,9 @@ STRING=(`([^`\\]|\\.)*`|'([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")
 
   {WHITE_SPACE}           { return WHITE_SPACE; }
   {EOL}                   { return EOL; }
+  {INCLUDE_TAG}           { return INCLUDE_TAG; }
+  {DEFINE_TAG}            { return DEFINE_TAG; }
+  {ASSIGN_TAG}            { return ASSIGN_TAG; }
   {DATA_DEF}              { return DATA_DEF; }
   {DATA_RES}              { return DATA_RES; }
   {COMMENT}               { return COMMENT; }

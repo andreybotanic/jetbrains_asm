@@ -5,15 +5,15 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface NasmDataElement extends PsiElement {
+public interface NasmPreprocessor extends PsiElement {
 
   @Nullable
-  NasmDataDefStmt getDataDefStmt();
+  NasmAssign getAssign();
 
   @Nullable
-  NasmDataResStmt getDataResStmt();
+  NasmDefine getDefine();
 
   @Nullable
-  PsiElement getLblDef();
+  NasmInclude getInclude();
 
 }

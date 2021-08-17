@@ -13,11 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Map;
-import java.util.Objects;
 
 public class NasmColorSettingsPage implements ColorSettingsPage {
     private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
@@ -26,9 +22,11 @@ public class NasmColorSettingsPage implements ColorSettingsPage {
             new AttributesDescriptor("Number", NasmSyntaxHighlighter.NUMBER),
             new AttributesDescriptor("NASM mnemonic", NasmSyntaxHighlighter.OPERATION),
             new AttributesDescriptor("Label", NasmSyntaxHighlighter.LABEL),
+            new AttributesDescriptor("Identifier", NasmSyntaxHighlighter.IDENTIFIER),
             new AttributesDescriptor("Register", NasmSyntaxHighlighter.REGISTER),
             new AttributesDescriptor("String", NasmSyntaxHighlighter.STRING),
             new AttributesDescriptor("Type size", NasmSyntaxHighlighter.SIZE),
+            new AttributesDescriptor("Preprocessor tag", NasmSyntaxHighlighter.PREPROCESSOR_TAG),
     };
 
     @Override

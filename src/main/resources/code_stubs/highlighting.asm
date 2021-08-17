@@ -4,6 +4,7 @@ section .text
 example_constant equ 45
 
 %define single_line_macro(x)   (x+5)
+%define SIZE   100
 
 %macro multi_line_macro 1
     mov    %1, ebx

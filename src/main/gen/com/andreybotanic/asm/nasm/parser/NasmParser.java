@@ -68,6 +68,20 @@ public class NasmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // ASSIGN_TAG Identifier Expr
+  public static boolean Assign(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Assign")) return false;
+    if (!nextTokenIs(b, ASSIGN_TAG)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, ASSIGN_TAG);
+    r = r && Identifier(b, l + 1);
+    r = r && Expr(b, l + 1, -1);
+    exit_section_(b, m, ASSIGN, r);
+    return r;
+  }
+
+  /* ********************************************************** */
   // DATA_DEF Expr (SEPARATOR Expr)*
   public static boolean DataDefStmt(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "DataDefStmt")) return false;
@@ -149,14 +163,14 @@ public class NasmParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // DataResStmt | DataDefStmt
-  public static boolean DataStmt(PsiBuilder b, int l) {
+  static boolean DataStmt(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "DataStmt")) return false;
-    if (!nextTokenIs(b, "<data stmt>", DATA_DEF, DATA_RES)) return false;
+    if (!nextTokenIs(b, "", DATA_DEF, DATA_RES)) return false;
     boolean r;
-    Marker m = enter_section_(b, l, _NONE_, DATA_STMT, "<data stmt>");
+    Marker m = enter_section_(b);
     r = DataResStmt(b, l + 1);
     if (!r) r = DataDefStmt(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
+    exit_section_(b, m, null, r);
     return r;
   }
 
@@ -177,6 +191,122 @@ public class NasmParser implements PsiParser, LightPsiParser {
     boolean r;
     r = consumeToken(b, COMMENT);
     if (!r) r = consumeToken(b, EOL);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // (DEFINE_TAG Identifier DefineParams Expr )
+  //          | (DEFINE_TAG Identifier Expr)
+  public static boolean Define(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Define")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, DEFINE, "<define>");
+    r = Define_0(b, l + 1);
+    if (!r) r = Define_1(b, l + 1);
+    exit_section_(b, l, m, r, false, NasmParser::DefineRecover);
+    return r;
+  }
+
+  // DEFINE_TAG Identifier DefineParams Expr
+  private static boolean Define_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Define_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, DEFINE_TAG);
+    r = r && Identifier(b, l + 1);
+    r = r && DefineParams(b, l + 1);
+    r = r && Expr(b, l + 1, -1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // DEFINE_TAG Identifier Expr
+  private static boolean Define_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Define_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, DEFINE_TAG);
+    r = r && Identifier(b, l + 1);
+    r = r && Expr(b, l + 1, -1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // ROUND_L Identifier (SEPARATOR Identifier)* ROUND_R
+  public static boolean DefineParams(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "DefineParams")) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, DEFINE_PARAMS, "<define params>");
+    r = consumeToken(b, ROUND_L);
+    p = r; // pin = 1
+    r = r && report_error_(b, Identifier(b, l + 1));
+    r = p && report_error_(b, DefineParams_2(b, l + 1)) && r;
+    r = p && consumeToken(b, ROUND_R) && r;
+    exit_section_(b, l, m, r, p, NasmParser::DefineParamsRecover);
+    return r || p;
+  }
+
+  // (SEPARATOR Identifier)*
+  private static boolean DefineParams_2(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "DefineParams_2")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!DefineParams_2_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "DefineParams_2", c)) break;
+    }
+    return true;
+  }
+
+  // SEPARATOR Identifier
+  private static boolean DefineParams_2_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "DefineParams_2_0")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeToken(b, SEPARATOR);
+    r = r && Identifier(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // !(EOL | COMMENT | Expr)
+  static boolean DefineParamsRecover(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "DefineParamsRecover")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NOT_);
+    r = !DefineParamsRecover_0(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // EOL | COMMENT | Expr
+  private static boolean DefineParamsRecover_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "DefineParamsRecover_0")) return false;
+    boolean r;
+    r = consumeToken(b, EOL);
+    if (!r) r = consumeToken(b, COMMENT);
+    if (!r) r = Expr(b, l + 1, -1);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // !(EOL | COMMENT)
+  static boolean DefineRecover(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "DefineRecover")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NOT_);
+    r = !DefineRecover_0(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // EOL | COMMENT
+  private static boolean DefineRecover_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "DefineRecover_0")) return false;
+    boolean r;
+    r = consumeToken(b, EOL);
+    if (!r) r = consumeToken(b, COMMENT);
     return r;
   }
 
@@ -289,6 +419,18 @@ public class NasmParser implements PsiParser, LightPsiParser {
     r = Expr(b, l + 1, -1);
     if (!r) r = Str(b, l + 1);
     exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // INCLUDE_TAG STRING
+  public static boolean Include(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Include")) return false;
+    if (!nextTokenIs(b, INCLUDE_TAG)) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = consumeTokens(b, 0, INCLUDE_TAG, STRING);
+    exit_section_(b, m, INCLUDE, r);
     return r;
   }
 
@@ -477,6 +619,21 @@ public class NasmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // Include
+  //                | Define
+  //                | Assign
+  public static boolean Preprocessor(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "Preprocessor")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, PREPROCESSOR, "<preprocessor>");
+    r = Include(b, l + 1);
+    if (!r) r = Define(b, l + 1);
+    if (!r) r = Assign(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
   // SECTION_DEF SECTION_NAME
   public static boolean Section(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "Section")) return false;
@@ -492,6 +649,7 @@ public class NasmParser implements PsiParser, LightPsiParser {
   // COMMENT
   //                 | Section
   //                 | Label
+  //                 | Preprocessor
   //                 | Directive
   //                 | Instruction
   //                 | DataElement
@@ -503,6 +661,7 @@ public class NasmParser implements PsiParser, LightPsiParser {
     r = consumeToken(b, COMMENT);
     if (!r) r = Section(b, l + 1);
     if (!r) r = Label(b, l + 1);
+    if (!r) r = Preprocessor(b, l + 1);
     if (!r) r = Directive(b, l + 1);
     if (!r) r = Instruction(b, l + 1);
     if (!r) r = DataElement(b, l + 1);

@@ -9,6 +9,7 @@ import com.andreybotanic.asm.nasm.psi.impl.*;
 public interface NasmTypes {
 
   IElementType ADDRESS = new NasmElementType("ADDRESS");
+  IElementType ASSIGN = new NasmElementType("ASSIGN");
   IElementType BITWISE_AND_EXPR = new NasmElementType("BITWISE_AND_EXPR");
   IElementType BITWISE_NOT_EXPR = new NasmElementType("BITWISE_NOT_EXPR");
   IElementType BITWISE_OR_EXPR = new NasmElementType("BITWISE_OR_EXPR");
@@ -18,12 +19,14 @@ public interface NasmTypes {
   IElementType DATA_DEF_STMT = new NasmElementType("DATA_DEF_STMT");
   IElementType DATA_ELEMENT = new NasmElementType("DATA_ELEMENT");
   IElementType DATA_RES_STMT = new NasmElementType("DATA_RES_STMT");
-  IElementType DATA_STMT = new NasmElementType("DATA_STMT");
+  IElementType DEFINE = new NasmElementType("DEFINE");
+  IElementType DEFINE_PARAMS = new NasmElementType("DEFINE_PARAMS");
   IElementType DIRECTIVE = new NasmElementType("DIRECTIVE");
   IElementType DIV_EXPR = new NasmElementType("DIV_EXPR");
   IElementType EXPR = new NasmElementType("EXPR");
   IElementType IDENTIFIER = new NasmElementType("IDENTIFIER");
   IElementType IMMEDIATE = new NasmElementType("IMMEDIATE");
+  IElementType INCLUDE = new NasmElementType("INCLUDE");
   IElementType INSTRUCTION = new NasmElementType("INSTRUCTION");
   IElementType LABEL = new NasmElementType("LABEL");
   IElementType LABEL_IDENTIFIER = new NasmElementType("LABEL_IDENTIFIER");
@@ -39,10 +42,12 @@ public interface NasmTypes {
   IElementType OPERATION = new NasmElementType("OPERATION");
   IElementType PARENTHESIS_EXPR = new NasmElementType("PARENTHESIS_EXPR");
   IElementType PLUS_EXPR = new NasmElementType("PLUS_EXPR");
+  IElementType PREPROCESSOR = new NasmElementType("PREPROCESSOR");
   IElementType REGISTER = new NasmElementType("REGISTER");
   IElementType SECTION = new NasmElementType("SECTION");
   IElementType STR = new NasmElementType("STR");
 
+  IElementType ASSIGN_TAG = new NasmTokenType("ASSIGN_TAG");
   IElementType BINARY = new NasmTokenType("BINARY");
   IElementType BITSHIFT_L = new NasmTokenType("<<");
   IElementType BITSHIFT_R = new NasmTokenType(">>");
@@ -56,6 +61,7 @@ public interface NasmTypes {
   IElementType DATA_DEF = new NasmTokenType("DATA_DEF");
   IElementType DATA_RES = new NasmTokenType("DATA_RES");
   IElementType DECIMAL = new NasmTokenType("DECIMAL");
+  IElementType DEFINE_TAG = new NasmTokenType("DEFINE_TAG");
   IElementType DIRECTIVE_OP = new NasmTokenType("DIRECTIVE_OP");
   IElementType DIVIDE = new NasmTokenType("/");
   IElementType DOLLARSIGN = new NasmTokenType("$");
@@ -71,6 +77,7 @@ public interface NasmTypes {
   IElementType GREATERTHANOREQUAL = new NasmTokenType(">=");
   IElementType HEXADECIMAL = new NasmTokenType("HEXADECIMAL");
   IElementType ID = new NasmTokenType("ID");
+  IElementType INCLUDE_TAG = new NasmTokenType("INCLUDE_TAG");
   IElementType LBL = new NasmTokenType("LBL");
   IElementType LBL_DEF = new NasmTokenType("LBL_DEF");
   IElementType LESSTHAN = new NasmTokenType("<");
@@ -109,6 +116,9 @@ public interface NasmTypes {
       if (type == ADDRESS) {
         return new NasmAddressImpl(node);
       }
+      else if (type == ASSIGN) {
+        return new NasmAssignImpl(node);
+      }
       else if (type == BITWISE_AND_EXPR) {
         return new NasmBitwiseANDExprImpl(node);
       }
@@ -136,8 +146,11 @@ public interface NasmTypes {
       else if (type == DATA_RES_STMT) {
         return new NasmDataResStmtImpl(node);
       }
-      else if (type == DATA_STMT) {
-        return new NasmDataStmtImpl(node);
+      else if (type == DEFINE) {
+        return new NasmDefineImpl(node);
+      }
+      else if (type == DEFINE_PARAMS) {
+        return new NasmDefineParamsImpl(node);
       }
       else if (type == DIRECTIVE) {
         return new NasmDirectiveImpl(node);
@@ -150,6 +163,9 @@ public interface NasmTypes {
       }
       else if (type == IMMEDIATE) {
         return new NasmImmediateImpl(node);
+      }
+      else if (type == INCLUDE) {
+        return new NasmIncludeImpl(node);
       }
       else if (type == INSTRUCTION) {
         return new NasmInstructionImpl(node);
@@ -195,6 +211,9 @@ public interface NasmTypes {
       }
       else if (type == PLUS_EXPR) {
         return new NasmPlusExprImpl(node);
+      }
+      else if (type == PREPROCESSOR) {
+        return new NasmPreprocessorImpl(node);
       }
       else if (type == REGISTER) {
         return new NasmRegisterImpl(node);

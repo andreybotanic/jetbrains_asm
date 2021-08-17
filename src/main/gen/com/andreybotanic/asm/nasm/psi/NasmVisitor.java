@@ -11,6 +11,10 @@ public class NasmVisitor extends PsiElementVisitor {
     visitExpr(o);
   }
 
+  public void visitAssign(@NotNull NasmAssign o) {
+    visitPsiElement(o);
+  }
+
   public void visitBitShiftLExpr(@NotNull NasmBitShiftLExpr o) {
     visitExpr(o);
   }
@@ -47,7 +51,11 @@ public class NasmVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitDataStmt(@NotNull NasmDataStmt o) {
+  public void visitDefine(@NotNull NasmDefine o) {
+    visitPsiElement(o);
+  }
+
+  public void visitDefineParams(@NotNull NasmDefineParams o) {
     visitPsiElement(o);
   }
 
@@ -69,6 +77,10 @@ public class NasmVisitor extends PsiElementVisitor {
   }
 
   public void visitImmediate(@NotNull NasmImmediate o) {
+    visitPsiElement(o);
+  }
+
+  public void visitInclude(@NotNull NasmInclude o) {
     visitPsiElement(o);
   }
 
@@ -131,6 +143,10 @@ public class NasmVisitor extends PsiElementVisitor {
 
   public void visitPlusExpr(@NotNull NasmPlusExpr o) {
     visitExpr(o);
+  }
+
+  public void visitPreprocessor(@NotNull NasmPreprocessor o) {
+    visitPsiElement(o);
   }
 
   public void visitRegister(@NotNull NasmRegister o) {
