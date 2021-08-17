@@ -1,17 +1,23 @@
 package com.andreybotanic.asm.nasm;
 
+import com.andreybotanic.asm.ResourceLoader;
 import com.andreybotanic.asm.icons.AsmIcons;
 import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.fileTypes.SyntaxHighlighter;
 import com.intellij.openapi.options.colors.AttributesDescriptor;
 import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
+import com.intellij.openapi.util.Pair;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Map;
+import java.util.Objects;
 
 public class NasmColorSettingsPage implements ColorSettingsPage {
     private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
@@ -37,17 +43,7 @@ public class NasmColorSettingsPage implements ColorSettingsPage {
 
     @Override
     public @NonNls @NotNull String getDemoText() {
-        return "var: db 'String', 10, 13\n" +
-                "mov eax, 0x01\n" +
-                "xor ax, ax\n" +
-                "cmp cl, byte [var]\n" +
-                ".label:\n" +
-                "add cx, 10h ; comment\n" +
-                "\n" +
-                "    ; comment too\n" +
-                "inc al\n" +
-                "dec bl\n" +
-                "jmp .label";
+        return ResourceLoader.loadResource("/code_stubs/highlighting.asm", getClass(), "");
     }
 
     @Override
