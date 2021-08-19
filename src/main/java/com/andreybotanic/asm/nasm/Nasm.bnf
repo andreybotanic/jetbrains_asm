@@ -111,13 +111,10 @@ NasmFile ::= item_*
 
 private item_ ::= COMMENT
                 | Section
-                | Label
                 | Preprocessor
                 | Directive
-                | Instruction
-                | DataElement
                 | MacroCall
-                | Identifier
+                | InlineItem
                 | EOL
                 ;
 
@@ -126,7 +123,7 @@ Preprocessor ::= Include
                | Define
                ;
 
-private InlineItem ::= Expr | Label | Instruction | DataElement | MacroCall | Identifier  { extends=Expr }
+private InlineItem ::= Expr | Label | Instruction | DataElement | Identifier  { extends=Expr }
 
 Include ::= INCLUDE_TAG STRING
 Define ::= (DEFINE_TAG Identifier DefineParams InlineItem )
@@ -161,7 +158,7 @@ Operand ::= Register
           | LabelIdentifier
           ;
 
-Label ::= LBL_DEF EOL* {
+Label ::= LBL_DEF {
     mixin       = "com.andreybotanic.asm.nasm.psi.impl.NasmNamedElementImpl"
     implements  = "com.andreybotanic.asm.nasm.psi.NasmNamedElement"
     methods     = [getName setName getNameIdentifier]
@@ -187,7 +184,7 @@ DataResStmt ::= DATA_RES Expr
 private DataStmt ::= DataResStmt | DataDefStmt
 private DataValueRecover ::= !(COMMENT | EOL)
 
-Directive ::= (DirectiveDecl|DirectiveDeclBrackets) EOL*
+Directive ::= DirectiveDecl | DirectiveDeclBrackets
 private DirectiveDecl ::= DIRECTIVE_OP (Expr SEPARATOR?)*
 private DirectiveDeclBrackets ::= SQUARE_L DIRECTIVE_OP Expr* SQUARE_R
 
@@ -219,14 +216,15 @@ Expr ::= Term8 { extends=Expr }
 ParenthesisExpr ::= ROUND_L Expr ROUND_R { pin(".*")=1 extends=Expr }
 
 DefineCall ::= Identifier DefineCallParams { extends=Expr }
-DefineCallParams ::= ROUND_L MacroCallArg (SEPARATOR MacroCallArg)* ROUND_R { pin=1 recoverWhile=DefineCallParamsRecover }
-private DefineCallParamsRecover ::= !(EOL | COMMENT | Expr)
+DefineCallParams ::= ROUND_L DefineCallArg (SEPARATOR DefineCallArg)* ROUND_R { pin(".*")=1 recoverWhile=DefineCallParamsRecover }
+private DefineCallParamsRecover ::= !(EOL | COMMENT | ROUND_R | Expr)
 
 MacroCall ::= Identifier MacroCallArgs { extends=Expr }
 MacroCallArgs ::= (MacroCallArg | MacroCallArgSeq) (SEPARATOR (MacroCallArg | MacroCallArgSeq))*
 MacroCallArgSeq ::= CURLY_L MacroCallArg (SEPARATOR MacroCallArg)* CURLY_R { pin=1 recoverWhile=MacroCallArgSeqRecover }
 private MacroCallArgSeqRecover ::= !(COMMENT | EOL)
 MacroCallArg ::= Expr { extends=Expr }
+DefineCallArg ::= Expr { extends=Expr }
 
 
 
