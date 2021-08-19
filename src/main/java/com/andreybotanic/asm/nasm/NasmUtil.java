@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class NasmUtil {
     static List<NasmLabel> findLabelReferencesByIdInProject(Project project, String targetLabelId) {
@@ -80,6 +81,23 @@ public class NasmUtil {
             if (nasmFile != null) {
                 Collection<NasmIdentifier> nasmIdentifiers = PsiTreeUtil.collectElementsOfType(nasmFile, NasmIdentifier.class);
                 result.addAll(nasmIdentifiers);
+            }
+        }
+        return result;
+    }
+
+    static List<NasmIdentifier> findIdentifierReferencesInProject(Project project, @NotNull String identifierName) {
+        List<NasmIdentifier> result = new ArrayList<>();
+        Collection<VirtualFile> virtualFiles = FileTypeIndex.getFiles(NasmFileType.INSTANCE, GlobalSearchScope.allScope(project));
+        for (VirtualFile virtualFile : virtualFiles) {
+            NasmFile nasmFile = (NasmFile)PsiManager.getInstance(project).findFile(virtualFile);
+            if (nasmFile != null) {
+                Collection<NasmIdentifier> nasmIdentifiers = PsiTreeUtil.collectElementsOfType(nasmFile, NasmIdentifier.class);
+                result.addAll(nasmIdentifiers
+                        .stream()
+                        .filter(nasmIdentifier -> nasmIdentifier.getName() != null)
+                        .filter(nasmIdentifier -> nasmIdentifier.getName().equals(identifierName))
+                        .collect(Collectors.toList()));
             }
         }
         return result;
