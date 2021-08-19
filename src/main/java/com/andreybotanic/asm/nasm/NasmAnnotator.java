@@ -1,7 +1,6 @@
 package com.andreybotanic.asm.nasm;
 
-import com.andreybotanic.asm.nasm.psi.NasmIdentifier;
-import com.andreybotanic.asm.nasm.psi.NasmTypes;
+import com.andreybotanic.asm.nasm.psi.*;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
@@ -12,6 +11,7 @@ import com.intellij.psi.tree.IElementType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class NasmAnnotator implements Annotator {
     /**
@@ -26,26 +26,40 @@ public class NasmAnnotator implements Annotator {
     @Override
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
         if (element instanceof NasmIdentifier) {
-            NasmIdentifier identifier = (NasmIdentifier) element;
-            // Search for definition if this ID not in define or macro and it's not an identifier definition
-            if (!(element.getParent() instanceof NasmFile) && !findInParents(element, NasmTypes.DEFINE) /* && !findInParents(element, NasmTypes.MACRO) */ ) {
-                String idName = identifier.getName();
-                if (idName == null) return;
-                List<NasmIdentifier> identifiers = NasmUtil.findIdentifierReferencesInProject(element.getProject(), idName);
-                if (identifiers.isEmpty()) {
-                    holder.newAnnotation(HighlightSeverity.ERROR, "Unresolved identifier")
-                            .range(TextRange.from(element.getTextRange().getStartOffset(), element.getTextRange().getLength()))
-                            .highlightType(ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)
-                            .create();
-                }
-            }
+            annotateUnresolvedReference((NasmIdentifier) element, holder);
         }
     }
 
-    private boolean findInParents(PsiElement element, IElementType elementType) {
+    private void annotateUnresolvedReference(@NotNull NasmIdentifier identifier, @NotNull AnnotationHolder holder) {
+        PsiElement parent = identifier.getParent();
+
+        // Skip definitions (also skip define args)
+        if (parent instanceof NasmAssign || parent instanceof NasmDefine || parent instanceof NasmDefineParams) return;
+
+        // Skip identifiers in define or macro
+        if (findInParents(identifier, NasmDefine.class) /* && !findInParents(element, NasmTypes.MACRO) */ ) return;
+
+        String idName = identifier.getName();
+
+        if (idName == null) return;
+
+        List<NasmIdentifier> identifiers = NasmUtil.findIdentifierReferencesInProject(identifier.getProject(), idName);
+        identifiers = identifiers.stream()
+                .filter(id->id.getParent() instanceof NasmAssign || id.getParent() instanceof NasmDefine)
+                .collect(Collectors.toList());
+
+        if (identifiers.isEmpty()) {
+            holder.newAnnotation(HighlightSeverity.ERROR, "Unresolved identifier '" + idName + "'")
+                    .range(TextRange.from(identifier.getTextRange().getStartOffset(), identifier.getTextRange().getLength()))
+                    .highlightType(ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)
+                    .create();
+        }
+    }
+
+    private boolean findInParents(@NotNull PsiElement element, Class<? extends PsiElement> elementClass) {
         PsiElement parent = element.getParent();
         if (parent == null) return false;
-        if (parent.equals(elementType)) return true;
-        return findInParents(parent, elementType);
+        if (elementClass.isInstance(parent)) return true;
+        return findInParents(parent, elementClass);
     }
 }
