@@ -126,7 +126,7 @@ Preprocessor ::= Include
                | Define
                ;
 
-private InlineItem ::= ConstExpr | Label | Instruction | DataElement | MacroCall | Identifier  { extends=ConstExpr }
+private InlineItem ::= Expr | Label | Instruction | DataElement | MacroCall | Identifier  { extends=Expr }
 
 Include ::= INCLUDE_TAG STRING
 Define ::= (DEFINE_TAG Identifier DefineParams InlineItem )
@@ -134,14 +134,15 @@ Define ::= (DEFINE_TAG Identifier DefineParams InlineItem )
 DefineParams ::= ROUND_L Identifier (SEPARATOR Identifier)* ROUND_R { pin=1 recoverWhile=DefineParamsRecover }
 private DefineRecover ::= !(EOL | COMMENT)
 private DefineParamsRecover ::= !(EOL | COMMENT | Expr)
-Assign ::= ASSIGN_TAG Identifier ConstExpr { pin=1 }
+Assign ::= ASSIGN_TAG Identifier Expr { pin=1 }
 
 Section ::= SECTION_DEF SECTION_NAME
 
-Immediate ::= ConstExpr
+Immediate ::= Expr { extends=Expr }
 Memory ::= Identifier | Address
-Address ::= SIZE_PREFIX? AddressInternal { extends=Expr }
-private AddressInternal ::= SQUARE_L MINUS? Expr SQUARE_R { pin(".*")=1  }
+Address ::= SIZE_PREFIX? EffectiveAddress
+private EffectiveAddress ::= SQUARE_L Expr SQUARE_R { pin(".*")=1 recoverWhile=EffectiveAddressRecover extends=Expr }
+private EffectiveAddressRecover ::= !(EOL | COMMENT)
 
 Register ::= REG_8 | REG_16 | REG_32 | REG_64 { extends=Expr }
 
@@ -170,14 +171,14 @@ Identifier ::= ID {
     mixin       = "com.andreybotanic.asm.nasm.psi.impl.NasmNamedElementImpl"
     implements  = "com.andreybotanic.asm.nasm.psi.NasmNamedElement"
     methods     = [getName setName getNameIdentifier getReferences]
-    extends     = ConstExpr
+    extends     = Expr
 }
 
 LabelIdentifier ::= LBL | ID {
     mixin       = "com.andreybotanic.asm.nasm.psi.impl.NasmNamedElementImpl"
     implements  = "com.andreybotanic.asm.nasm.psi.NasmNamedElement"
     methods     = [getName setName getNameIdentifier getReferences]
-    extends     = ConstExpr
+    extends     = Expr
 }
 
 DataElement ::= LBL_DEF? DataStmt EOL*
@@ -190,91 +191,44 @@ Directive ::= (DirectiveDecl|DirectiveDeclBrackets) EOL*
 private DirectiveDecl ::= DIRECTIVE_OP (Expr SEPARATOR?)*
 private DirectiveDeclBrackets ::= SQUARE_L DIRECTIVE_OP Expr* SQUARE_R
 
-Expr ::= ParenthesisExpr
-       | MulGroupExpr
-       | PlusGroupExpr
-       | ModulusExpr
-       | BitShiftGroupExpr
-       | BitwiseANDExpr
-       | BitwiseORExpr
-       | BitwiseXORExpr
-       | BitwiseNOTExpr
-       | LogicalANDExpr
-       | LogicalORExpr
-       | LogicalXORExpr
-       | NumericLiteral
-       | Str
-       | Address
-       | Register
-       | Operation
-       | Identifier
-       | LabelIdentifier
-       ;
+// Math expressions
+private BitShiftOp ::= BITSHIFT_L | BITSHIFT_R
+private MultOp ::=TIMES | DIVIDE | PERCENT
+private PlusOp ::= PLUS | MINUS
+private UnaryOp ::= BITWISE_NOT | MINUS | PLUS
 
-ConstExpr ::= ConstParenthesisExpr
-            | ConstMulGroupExpr
-            | ConstPlusGroupExpr
-            | ConstModulusExpr
-            | ConstBitShiftGroupExpr
-            | ConstBitwiseANDExpr
-            | ConstBitwiseORExpr
-            | ConstBitwiseXORExpr
-            | ConstBitwiseNOTExpr
-            | ConstLogicalANDExpr
-            | ConstLogicalORExpr
-            | ConstLogicalXORExpr
-            | Identifier
-            | NumericLiteral
-            | Str
-            ;
+Primary ::= Register
+          | Identifier
+          | NumericLiteral
+          | Str
+          | ParenthesisExpr
+          | Instruction { extends=Expr }
 
-DefineCall ::= Identifier DefineCallParams
-DefineCallParams ::= ROUND_L ConstExpr (SEPARATOR ConstExpr)* ROUND_R { pin=1 recoverWhile=DefineCallParamsRecover }
+PreFactor ::= DefineCall | Primary { extends=Expr }
+Factor ::= PreFactor | (UnaryOp Factor) { extends=Expr }
+Term0 ::= Factor (MultOp Factor)* { extends=Expr }
+Term1 ::= Term0 (PlusOp Term0)* { extends=Expr }
+Term2 ::= Term1 (BitShiftOp Term1)* { extends=Expr }
+Term3 ::= Term2 (BITWISE_AND Term2)* { extends=Expr }
+Term4 ::= Term3 (BITWISE_XOR Term3)* { extends=Expr }
+Term5 ::= Term4 (BITWISE_OR Term4)* { extends=Expr }
+Term6 ::= Term5 (LOGICAL_AND Term5)* { extends=Expr }
+Term7 ::= Term6 (LOGICAL_XOR Term6)* { extends=Expr }
+Term8 ::= Term7 (LOGICAL_OR Term7)* { extends=Expr }
+Expr ::= Term8 { extends=Expr }
+ParenthesisExpr ::= ROUND_L Expr ROUND_R { pin(".*")=1 extends=Expr }
+
+DefineCall ::= Identifier DefineCallParams { extends=Expr }
+DefineCallParams ::= ROUND_L MacroCallArg (SEPARATOR MacroCallArg)* ROUND_R { pin=1 recoverWhile=DefineCallParamsRecover }
 private DefineCallParamsRecover ::= !(EOL | COMMENT | Expr)
-MacroCall ::= Identifier MacroCallArgs { extends=ConstExpr }
+
+MacroCall ::= Identifier MacroCallArgs { extends=Expr }
 MacroCallArgs ::= (MacroCallArg | MacroCallArgSeq) (SEPARATOR (MacroCallArg | MacroCallArgSeq))*
 MacroCallArgSeq ::= CURLY_L MacroCallArg (SEPARATOR MacroCallArg)* CURLY_R { pin=1 recoverWhile=MacroCallArgSeqRecover }
 private MacroCallArgSeqRecover ::= !(COMMENT | EOL)
-MacroCallArg ::= ConstExpr
+MacroCallArg ::= Expr { extends=Expr }
 
-ParenthesisExpr ::= ROUND_L Expr ROUND_R { pin(".*")=1 }
-ConstParenthesisExpr ::= ROUND_L ConstExpr ROUND_R { pin(".*")=1 extends=ConstExpr }
 
-ConstMulExpr ::= ConstExpr TIMES ConstExpr { extends=ConstExpr }
-ConstDivExpr ::= ConstExpr DIVIDE ConstExpr { extends=ConstExpr }
-private ConstMulGroupExpr ::= ConstMulExpr | ConstDivExpr { extends=ConstExpr }
-ConstPlusExpr ::= ConstExpr PLUS ConstExpr { extends=ConstExpr }
-ConstMinusExpr ::= ConstExpr MINUS ConstExpr { extends=ConstExpr }
-private ConstPlusGroupExpr ::= ConstPlusExpr | ConstMinusExpr { extends=ConstExpr }
-ConstModulusExpr ::= ConstExpr PERCENT ConstExpr { extends=ConstExpr }
-ConstBitShiftLExpr ::= ConstExpr BITSHIFT_L ConstExpr { extends=ConstExpr }
-ConstBitShiftRExpr ::= ConstExpr BITSHIFT_R ConstExpr { extends=ConstExpr }
-private ConstBitShiftGroupExpr ::= ConstBitShiftLExpr | ConstBitShiftRExpr { extends=ConstExpr }
-ConstBitwiseANDExpr ::= ConstExpr BITWISE_AND ConstExpr { extends=ConstExpr }
-ConstBitwiseORExpr ::= ConstExpr BITWISE_OR ConstExpr { extends=ConstExpr }
-ConstBitwiseXORExpr ::= ConstExpr BITWISE_XOR ConstExpr { extends=ConstExpr }
-ConstBitwiseNOTExpr ::= BITWISE_NOT ConstExpr { extends=ConstExpr }
-ConstLogicalANDExpr ::= ConstExpr LOGICAL_AND ConstExpr { extends=ConstExpr }
-ConstLogicalORExpr ::= ConstExpr LOGICAL_OR ConstExpr { extends=ConstExpr }
-ConstLogicalXORExpr ::= ConstExpr LOGICAL_XOR ConstExpr { extends=ConstExpr }
 
-MulExpr ::= Expr TIMES Expr
-DivExpr ::= Expr DIVIDE Expr
-private MulGroupExpr ::= MulExpr | DivExpr
-PlusExpr ::= Expr PLUS Expr
-MinusExpr ::= Expr MINUS Expr
-private PlusGroupExpr ::= PlusExpr | MinusExpr
-ModulusExpr ::= Expr PERCENT Expr
-BitShiftLExpr ::= Expr BITSHIFT_L Expr
-BitShiftRExpr ::= Expr BITSHIFT_R Expr
-private BitShiftGroupExpr ::= BitShiftLExpr | BitShiftRExpr
-BitwiseANDExpr ::= Expr BITWISE_AND Expr
-BitwiseORExpr ::= Expr BITWISE_OR Expr
-BitwiseXORExpr ::= Expr BITWISE_XOR Expr
-BitwiseNOTExpr ::= BITWISE_NOT Expr
-LogicalANDExpr ::= Expr LOGICAL_AND Expr
-LogicalORExpr ::= Expr LOGICAL_OR Expr
-LogicalXORExpr ::= Expr LOGICAL_XOR Expr
-
-NumericLiteral ::= SIZE_PREFIX? (BITWISE_NOT|MINUS|PLUS)? (BINARY|ZEROES|HEXADECIMAL|DECIMAL|FLOAT_DECIMAL|CHARACTER) { extends=ConstExpr }
-Str ::= STRING { extends=ConstExpr }
+NumericLiteral ::= BINARY|ZEROES|HEXADECIMAL|DECIMAL|FLOAT_DECIMAL|CHARACTER { extends=Expr }
+Str ::= STRING { extends=Expr }
