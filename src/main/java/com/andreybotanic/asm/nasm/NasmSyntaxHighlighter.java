@@ -53,6 +53,7 @@ public class NasmSyntaxHighlighter extends SyntaxHighlighterBase {
         AttributesKeys.put(NasmTypes.INCLUDE_TAG, PREPROCESSOR_TAG);
         AttributesKeys.put(NasmTypes.ASSIGN_TAG, PREPROCESSOR_TAG);
         AttributesKeys.put(NasmTypes.DEFINE_TAG, PREPROCESSOR_TAG);
+        AttributesKeys.put(NasmTypes.TOKEN_CONCAT, PREPROCESSOR_TAG);
 
         AttributesKeys.put(NasmTypes.GENERAL_OP, OPERATION);
         AttributesKeys.put(NasmTypes.DATA_DEF, OPERATION);

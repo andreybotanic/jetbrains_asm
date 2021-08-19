@@ -63,6 +63,8 @@ STRING=(`([^`\\]|\\.)*`|'([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")
   "]"                     { return SQUARE_R; }
   "("                     { return ROUND_L; }
   ")"                     { return ROUND_R; }
+  "{"                     { return CURLY_L; }
+  "}"                     { return CURLY_R; }
   ","                     { return SEPARATOR; }
   "."                     { return DOT; }
   "?"                     { return QUESTION; }

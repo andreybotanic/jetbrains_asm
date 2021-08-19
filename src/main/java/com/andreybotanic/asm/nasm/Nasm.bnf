@@ -103,8 +103,6 @@
     TOKEN_CONCAT        = '%+'
 
   ]
-
-  //extends(".*Expr") = Expr
 }
 
 NasmFile ::= item_*
@@ -195,10 +193,11 @@ private PlusOp ::= PLUS | MINUS
 private UnaryOp ::= BITWISE_NOT | MINUS | PLUS
 
 Primary ::= Register
-          | Identifier
           | NumericLiteral
           | Str
           | ParenthesisExpr
+          | ConcatExpr
+          | Identifier
           | Instruction { extends=Expr }
 
 PreFactor ::= DefineCall | Primary { extends=Expr }
@@ -214,6 +213,7 @@ Term7 ::= Term6 (LOGICAL_XOR Term6)* { extends=Expr }
 Term8 ::= Term7 (LOGICAL_OR Term7)* { extends=Expr }
 Expr ::= Term8 { extends=Expr }
 ParenthesisExpr ::= ROUND_L Expr ROUND_R { pin(".*")=1 extends=Expr }
+ConcatExpr ::= (Identifier | DECIMAL | COLON) (TOKEN_CONCAT ConcatExpr)*    // TODO: add more rules for concat
 
 DefineCall ::= Identifier DefineCallParams { extends=Expr }
 DefineCallParams ::= ROUND_L DefineCallArg (SEPARATOR DefineCallArg)* ROUND_R { pin(".*")=1 recoverWhile=DefineCallParamsRecover }
@@ -225,8 +225,6 @@ MacroCallArgSeq ::= CURLY_L MacroCallArg (SEPARATOR MacroCallArg)* CURLY_R { pin
 private MacroCallArgSeqRecover ::= !(COMMENT | EOL)
 MacroCallArg ::= Expr { extends=Expr }
 DefineCallArg ::= Expr { extends=Expr }
-
-
 
 NumericLiteral ::= BINARY|ZEROES|HEXADECIMAL|DECIMAL|FLOAT_DECIMAL|CHARACTER { extends=Expr }
 Str ::= STRING { extends=Expr }
