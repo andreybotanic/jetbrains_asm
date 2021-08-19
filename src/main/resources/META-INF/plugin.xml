@@ -23,6 +23,7 @@
         <lang.syntaxHighlighterFactory language="Nasm"
                                        implementationClass="com.andreybotanic.asm.nasm.NasmSyntaxHighlighterFactory"/>
         <colorSettingsPage implementation="com.andreybotanic.asm.nasm.NasmColorSettingsPage"/>
+        <annotator language="Nasm" implementationClass="com.andreybotanic.asm.nasm.NasmAnnotator"/>
         <psi.referenceContributor implementation="com.andreybotanic.asm.nasm.NasmReferenceContributor"/>
     </extensions>
 

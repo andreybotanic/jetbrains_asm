@@ -68,6 +68,8 @@
     SQUARE_R            = ']'
     ROUND_L             = '('
     ROUND_R             = ')'
+    CURLY_L             = '{'
+    CURLY_R             = '}'
     SEPARATOR           = ','
     DOT                 = '.'
     QUESTION            = '?'
@@ -101,45 +103,45 @@
     TOKEN_CONCAT        = '%+'
 
   ]
-
-  extends(".*Expr") = Expr
 }
 
 NasmFile ::= item_*
 
 private item_ ::= COMMENT
                 | Section
-                | Label
                 | Preprocessor
                 | Directive
-                | Instruction
-                | DataElement
+                | MacroCall
+                | InlineItem
                 | EOL
-                | ID
                 ;
 
 Preprocessor ::= Include
-               | Define
                | Assign
+               | Define
                ;
+
+private InlineItem ::= Expr | Label | Instruction | DataElement | Identifier  { extends=Expr }
+
 Include ::= INCLUDE_TAG STRING
-Define ::= (DEFINE_TAG Identifier DefineParams Expr )
-         | (DEFINE_TAG Identifier Expr) { pin=1 recoverWhile=DefineRecover }
+Define ::= (DEFINE_TAG Identifier DefineParams InlineItem )
+         | (DEFINE_TAG Identifier InlineItem ) { pin=1 recoverWhile=DefineRecover }
 DefineParams ::= ROUND_L Identifier (SEPARATOR Identifier)* ROUND_R { pin=1 recoverWhile=DefineParamsRecover }
 private DefineRecover ::= !(EOL | COMMENT)
 private DefineParamsRecover ::= !(EOL | COMMENT | Expr)
-Assign ::= ASSIGN_TAG Identifier Expr
+Assign ::= ASSIGN_TAG Identifier Expr { pin=1 }
 
 Section ::= SECTION_DEF SECTION_NAME
 
-Immediate ::= Expr | Str
+Immediate ::= Expr { extends=Expr }
 Memory ::= Identifier | Address
-Address ::= SIZE_PREFIX? AddressInternal { extends=Expr }
-private AddressInternal ::= SQUARE_L MINUS? Expr SQUARE_R { pin(".*")=1  }
+Address ::= SIZE_PREFIX? EffectiveAddress
+private EffectiveAddress ::= SQUARE_L Expr SQUARE_R { pin(".*")=1 recoverWhile=EffectiveAddressRecover extends=Expr }
+private EffectiveAddressRecover ::= !(EOL | COMMENT)
 
 Register ::= REG_8 | REG_16 | REG_32 | REG_64 { extends=Expr }
 
-Instruction ::= Operation Operands? COMMENT? (<<eof>> | EOL+)?
+Instruction ::= Operation Operands? COMMENT?
 
 Operation ::= GENERAL_OP { extends=Expr }
 
@@ -147,13 +149,14 @@ private Operands ::= Operand (SEPARATOR Operand)* { pin=1 recoverWhile=OperandRe
 private OperandRecover ::= !(COMMENT | EOL)
 
 Operand ::= Register
+          | DefineCall
           | Immediate
           | Memory
-          | Identifier
+          | MacroCall
           | LabelIdentifier
           ;
 
-Label ::= LBL_DEF EOL* {
+Label ::= LBL_DEF {
     mixin       = "com.andreybotanic.asm.nasm.psi.impl.NasmNamedElementImpl"
     implements  = "com.andreybotanic.asm.nasm.psi.NasmNamedElement"
     methods     = [getName setName getNameIdentifier]
@@ -179,50 +182,49 @@ DataResStmt ::= DATA_RES Expr
 private DataStmt ::= DataResStmt | DataDefStmt
 private DataValueRecover ::= !(COMMENT | EOL)
 
-Directive ::= (DirectiveDecl|DirectiveDeclBrackets) EOL*
+Directive ::= DirectiveDecl | DirectiveDeclBrackets
 private DirectiveDecl ::= DIRECTIVE_OP (Expr SEPARATOR?)*
 private DirectiveDeclBrackets ::= SQUARE_L DIRECTIVE_OP Expr* SQUARE_R
 
-Expr ::= ParenthesisExpr
-       | MulGroupExpr
-       | PlusGroupExpr
-       | ModulusExpr
-       | BitShiftGroupExpr
-       | BitwiseANDExpr
-       | BitwiseORExpr
-       | BitwiseXORExpr
-       | BitwiseNOTExpr
-       | LogicalANDExpr
-       | LogicalORExpr
-       | LogicalXORExpr
-       | NumericLiteral
-       | Str
-       | Address
-       | Register
-       | Operation
-       | Identifier
-       | LabelIdentifier
-       ;
+// Math expressions
+private BitShiftOp ::= BITSHIFT_L | BITSHIFT_R
+private MultOp ::=TIMES | DIVIDE | PERCENT
+private PlusOp ::= PLUS | MINUS
+private UnaryOp ::= BITWISE_NOT | MINUS | PLUS
 
-ParenthesisExpr ::= ROUND_L Expr ROUND_R { pin(".*")=1 }
+Primary ::= Register
+          | NumericLiteral
+          | Str
+          | ParenthesisExpr
+          | ConcatExpr
+          | Identifier
+          | Instruction { extends=Expr }
 
-MulExpr ::= Expr TIMES Expr
-DivExpr ::= Expr DIVIDE Expr
-private MulGroupExpr ::= MulExpr | DivExpr
-PlusExpr ::= Expr PLUS Expr
-MinusExpr ::= Expr MINUS Expr
-private PlusGroupExpr ::= PlusExpr | MinusExpr
-ModulusExpr ::= Expr PERCENT Expr
-BitShiftLExpr ::= Expr BITSHIFT_L Expr
-BitShiftRExpr ::= Expr BITSHIFT_R Expr
-private BitShiftGroupExpr ::= BitShiftLExpr | BitShiftRExpr
-BitwiseANDExpr ::= Expr BITWISE_AND Expr
-BitwiseORExpr ::= Expr BITWISE_OR Expr
-BitwiseXORExpr ::= Expr BITWISE_XOR Expr
-BitwiseNOTExpr ::= BITWISE_NOT Expr
-LogicalANDExpr ::= Expr LOGICAL_AND Expr
-LogicalORExpr ::= Expr LOGICAL_OR Expr
-LogicalXORExpr ::= Expr LOGICAL_XOR Expr
+PreFactor ::= DefineCall | Primary { extends=Expr }
+Factor ::= PreFactor | (UnaryOp Factor) { extends=Expr }
+Term0 ::= Factor (MultOp Factor)* { extends=Expr }
+Term1 ::= Term0 (PlusOp Term0)* { extends=Expr }
+Term2 ::= Term1 (BitShiftOp Term1)* { extends=Expr }
+Term3 ::= Term2 (BITWISE_AND Term2)* { extends=Expr }
+Term4 ::= Term3 (BITWISE_XOR Term3)* { extends=Expr }
+Term5 ::= Term4 (BITWISE_OR Term4)* { extends=Expr }
+Term6 ::= Term5 (LOGICAL_AND Term5)* { extends=Expr }
+Term7 ::= Term6 (LOGICAL_XOR Term6)* { extends=Expr }
+Term8 ::= Term7 (LOGICAL_OR Term7)* { extends=Expr }
+Expr ::= Term8 { extends=Expr }
+ParenthesisExpr ::= ROUND_L Expr ROUND_R { pin(".*")=1 extends=Expr }
+ConcatExpr ::= (Identifier | DECIMAL | COLON) (TOKEN_CONCAT ConcatExpr)*    // TODO: add more rules for concat
 
-NumericLiteral ::= SIZE_PREFIX? (BITWISE_NOT|MINUS|PLUS)? (BINARY|ZEROES|HEXADECIMAL|DECIMAL|FLOAT_DECIMAL|CHARACTER) { extends=Expr }
+DefineCall ::= Identifier DefineCallParams { extends=Expr }
+DefineCallParams ::= ROUND_L DefineCallArg (SEPARATOR DefineCallArg)* ROUND_R { pin(".*")=1 recoverWhile=DefineCallParamsRecover }
+private DefineCallParamsRecover ::= !(EOL | COMMENT | ROUND_R | Expr)
+
+MacroCall ::= Identifier MacroCallArgs { extends=Expr }
+MacroCallArgs ::= (MacroCallArg | MacroCallArgSeq) (SEPARATOR (MacroCallArg | MacroCallArgSeq))*
+MacroCallArgSeq ::= CURLY_L MacroCallArg (SEPARATOR MacroCallArg)* CURLY_R { pin=1 recoverWhile=MacroCallArgSeqRecover }
+private MacroCallArgSeqRecover ::= !(COMMENT | EOL)
+MacroCallArg ::= Expr { extends=Expr }
+DefineCallArg ::= Expr { extends=Expr }
+
+NumericLiteral ::= BINARY|ZEROES|HEXADECIMAL|DECIMAL|FLOAT_DECIMAL|CHARACTER { extends=Expr }
 Str ::= STRING { extends=Expr }
