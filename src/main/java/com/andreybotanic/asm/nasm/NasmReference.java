@@ -47,9 +47,9 @@ public class NasmReference extends PsiReferenceBase<PsiElement> implements PsiPo
         for (final NasmIdentifier identifier : identifiers) {
             String identifierText = identifier.getId().getText();
             if (identifierText != null && identifierText.length() > 0) {
-                variants.add(LookupElementBuilder.create(identifier.getId()).
-                        withIcon(AsmIcons.NasmFileType).
-                        withTypeText(identifier.getContainingFile().getName())
+                variants.add(LookupElementBuilder.create(identifier.getId())
+                        .withIcon(AsmIcons.NasmFileType)
+                        .withTypeText(identifier.getContainingFile().getName())
                 );
             }
         }

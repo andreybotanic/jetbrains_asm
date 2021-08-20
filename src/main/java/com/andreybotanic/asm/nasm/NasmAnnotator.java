@@ -43,11 +43,7 @@ public class NasmAnnotator implements Annotator {
 
         if (idName == null) return;
 
-        List<NasmIdentifier> identifiers = NasmUtil.findIdentifierReferencesInProject(identifier.getProject(), idName);
-        identifiers = identifiers.stream()
-                .filter(id->id.getParent() instanceof NasmAssign || id.getParent() instanceof NasmDefine)
-                .collect(Collectors.toList());
-
+        List<NasmIdentifier> identifiers = NasmUtil.findIdentifierDefinitionsInProject(identifier.getProject(), idName);
         if (identifiers.isEmpty()) {
             holder.newAnnotation(HighlightSeverity.ERROR, "Unresolved identifier '" + idName + "'")
                     .range(TextRange.from(identifier.getTextRange().getStartOffset(), identifier.getTextRange().getLength()))

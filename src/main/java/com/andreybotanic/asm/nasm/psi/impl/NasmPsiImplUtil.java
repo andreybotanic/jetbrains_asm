@@ -4,7 +4,9 @@ import com.andreybotanic.asm.nasm.psi.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReference;
+import com.intellij.psi.PsiWhiteSpace;
 import com.intellij.psi.impl.source.resolve.reference.ReferenceProvidersRegistry;
+import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 
 public class NasmPsiImplUtil {
@@ -113,4 +115,38 @@ public class NasmPsiImplUtil {
     public static PsiReference[] getReferences(@NotNull NasmLabelIdentifier element) {
         return ReferenceProvidersRegistry.getReferencesFromProviders(element);
     }
+
+    public static PsiElement getNameIdentifier(NasmAssign assign) {
+        return PsiTreeUtil.findChildOfType(assign, NasmIdentifier.class);
+    }
+
+    public static String getName(NasmAssign assign) {
+        PsiElement id = getNameIdentifier(assign);
+        if (id != null) {
+            return id.getText();
+        }
+        return null;
+    }
+
+    public static PsiElement setName(NasmAssign assign, String newName) {
+        return setName((NasmIdentifier) getNameIdentifier(assign), newName);
+    }
+
+    public static PsiElement getNameIdentifier(NasmDefine define) {
+        return PsiTreeUtil.findChildOfType(define, NasmIdentifier.class);
+    }
+
+    public static String getName(NasmDefine define) {
+        PsiElement id = getNameIdentifier(define);
+        if (id != null) {
+            return id.getText();
+        }
+        return null;
+    }
+
+    public static PsiElement setName(NasmDefine define, String newName) {
+        return setName((NasmIdentifier) getNameIdentifier(define), newName);
+    }
+
+
 }

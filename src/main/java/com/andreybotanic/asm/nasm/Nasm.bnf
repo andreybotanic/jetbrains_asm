@@ -125,11 +125,23 @@ private InlineItem ::= Expr | Label | Instruction | DataElement | Identifier  { 
 
 Include ::= INCLUDE_TAG STRING
 Define ::= (DEFINE_TAG Identifier DefineParams InlineItem )
-         | (DEFINE_TAG Identifier InlineItem ) { pin=1 recoverWhile=DefineRecover }
+         | (DEFINE_TAG Identifier InlineItem ) {
+    pin         = 1
+    recoverWhile= DefineRecover
+    mixin       = "com.andreybotanic.asm.nasm.psi.impl.NasmNamedElementImpl"
+    implements  = "com.andreybotanic.asm.nasm.psi.NasmNamedElement"
+    methods     = [getName setName getNameIdentifier]
+}
+
 DefineParams ::= ROUND_L Identifier (SEPARATOR Identifier)* ROUND_R { pin=1 recoverWhile=DefineParamsRecover }
 private DefineRecover ::= !(EOL | COMMENT)
 private DefineParamsRecover ::= !(EOL | COMMENT | Expr)
-Assign ::= ASSIGN_TAG Identifier Expr { pin=1 }
+Assign ::= ASSIGN_TAG Identifier Expr {
+    pin         = 1
+    mixin       = "com.andreybotanic.asm.nasm.psi.impl.NasmNamedElementImpl"
+    implements  = "com.andreybotanic.asm.nasm.psi.NasmNamedElement"
+    methods     = [getName setName getNameIdentifier]
+}
 
 Section ::= SECTION_DEF SECTION_NAME
 

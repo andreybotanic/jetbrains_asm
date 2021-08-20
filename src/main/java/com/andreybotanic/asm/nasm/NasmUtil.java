@@ -1,7 +1,6 @@
 package com.andreybotanic.asm.nasm;
 
-import com.andreybotanic.asm.nasm.psi.NasmIdentifier;
-import com.andreybotanic.asm.nasm.psi.NasmLabel;
+import com.andreybotanic.asm.nasm.psi.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -15,10 +14,7 @@ import com.intellij.util.indexing.FileBasedIndex;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class NasmUtil {
@@ -98,6 +94,32 @@ public class NasmUtil {
                         .filter(nasmIdentifier -> nasmIdentifier.getName() != null)
                         .filter(nasmIdentifier -> nasmIdentifier.getName().equals(identifierName))
                         .collect(Collectors.toList()));
+            }
+        }
+        return result;
+    }
+
+    static List<NasmIdentifier> findIdentifierDefinitionsInProject(Project project, @NotNull String identifierName) {
+        List<NasmIdentifier> result = new ArrayList<>();
+        Collection<VirtualFile> virtualFiles = FileTypeIndex.getFiles(NasmFileType.INSTANCE, GlobalSearchScope.allScope(project));
+        for (VirtualFile virtualFile : virtualFiles) {
+            NasmFile nasmFile = (NasmFile)PsiManager.getInstance(project).findFile(virtualFile);
+            if (nasmFile != null) {
+                Collection<NasmPreprocessor> directives =
+                        PsiTreeUtil.findChildrenOfType(nasmFile, NasmPreprocessor.class).stream()
+                                .filter(nasmPreprocessor -> {
+                                    PsiElement firstChild = nasmPreprocessor.getFirstChild();
+                                    return firstChild instanceof NasmAssign || firstChild instanceof NasmDefine;
+                                })
+                                .collect(Collectors.toList());
+                Collection<NasmIdentifier> nasmIdentifiers =
+                        directives.stream()
+                                .map(directive -> (NasmIdentifier) ((NasmNamedElement) directive.getFirstChild()).getNameIdentifier())
+                                .filter(Objects::nonNull)
+                                .filter(nasmIdentifier -> ((NasmNamedElement) nasmIdentifier).getName() != null)
+                                .filter(nasmIdentifier -> ((NasmNamedElement) nasmIdentifier).getName().equals(identifierName))
+                                .collect(Collectors.toList());
+                result.addAll(nasmIdentifiers);
             }
         }
         return result;
