@@ -8,6 +8,7 @@ import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
+import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -37,7 +38,7 @@ public class NasmAnnotator implements Annotator {
         if (parent instanceof NasmAssign || parent instanceof NasmDefine || parent instanceof NasmDefineParams) return;
 
         // Skip identifiers in define or macro
-        if (findInParents(identifier, NasmDefine.class) /* && !findInParents(element, NasmTypes.MACRO) */ ) return;
+        if (PsiTreeUtil.getParentOfType(identifier, NasmDefine.class) != null /* && !findInParents(element, NasmTypes.MACRO) */ ) return;
 
         String idName = identifier.getName();
 
@@ -50,12 +51,5 @@ public class NasmAnnotator implements Annotator {
                     .highlightType(ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)
                     .create();
         }
-    }
-
-    private boolean findInParents(@NotNull PsiElement element, Class<? extends PsiElement> elementClass) {
-        PsiElement parent = element.getParent();
-        if (parent == null) return false;
-        if (elementClass.isInstance(parent)) return true;
-        return findInParents(parent, elementClass);
     }
 }
