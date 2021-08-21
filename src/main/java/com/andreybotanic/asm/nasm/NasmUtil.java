@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class NasmUtil {
     static List<NasmLabel> findLabelReferencesByIdInProject(Project project, String targetLabelId) {
@@ -103,23 +104,51 @@ public class NasmUtil {
         List<NasmIdentifier> result = new ArrayList<>();
         Collection<VirtualFile> virtualFiles = FileTypeIndex.getFiles(NasmFileType.INSTANCE, GlobalSearchScope.allScope(project));
         for (VirtualFile virtualFile : virtualFiles) {
-            NasmFile nasmFile = (NasmFile)PsiManager.getInstance(project).findFile(virtualFile);
+            NasmFile nasmFile = (NasmFile) PsiManager.getInstance(project).findFile(virtualFile);
             if (nasmFile != null) {
-                Collection<NasmPreprocessor> directives =
+                // Search in preprocessor directives
+                Collection<NasmIdentifier> nasmIdentifiers =
                         PsiTreeUtil.findChildrenOfType(nasmFile, NasmPreprocessor.class).stream()
                                 .filter(nasmPreprocessor -> {
                                     PsiElement firstChild = nasmPreprocessor.getFirstChild();
                                     return firstChild instanceof NasmAssign || firstChild instanceof NasmDefine;
                                 })
-                                .collect(Collectors.toList());
-                Collection<NasmIdentifier> nasmIdentifiers =
-                        directives.stream()
                                 .map(directive -> (NasmIdentifier) ((NasmNamedElement) directive.getFirstChild()).getNameIdentifier())
                                 .filter(Objects::nonNull)
-                                .filter(nasmIdentifier -> ((NasmNamedElement) nasmIdentifier).getName() != null)
-                                .filter(nasmIdentifier -> ((NasmNamedElement) nasmIdentifier).getName().equals(identifierName))
+                                .filter(nasmIdentifier -> nasmIdentifier.getName() != null)
+                                .filter(nasmIdentifier -> nasmIdentifier.getName().equals(identifierName))
                                 .collect(Collectors.toList());
                 result.addAll(nasmIdentifiers);
+
+                // Search in data definitions
+                nasmIdentifiers =
+                        Stream.of(nasmFile.getChildren())
+                                .filter(psiElement -> psiElement instanceof NasmPrimary)
+                                .filter(element -> PsiTreeUtil.skipWhitespacesForward(element) instanceof NasmDataElement)
+                                .map(element -> PsiTreeUtil.findChildOfType(element, NasmIdentifier.class))
+                                .filter(Objects::nonNull)
+                                .filter(nasmIdentifier -> nasmIdentifier.getName() != null)
+                                .filter(nasmIdentifier -> nasmIdentifier.getName().equals(identifierName))
+                                .collect(Collectors.toList());
+                result.addAll(nasmIdentifiers);
+            }
+        }
+        return result;
+    }
+
+    static List<NasmLabel> findLabelsInProject(Project project, @NotNull String labelName) {
+        List<NasmLabel> result = new ArrayList<>();
+        Collection<VirtualFile> virtualFiles = FileTypeIndex.getFiles(NasmFileType.INSTANCE, GlobalSearchScope.allScope(project));
+        for (VirtualFile virtualFile : virtualFiles) {
+            NasmFile nasmFile = (NasmFile) PsiManager.getInstance(project).findFile(virtualFile);
+            if (nasmFile != null) {
+                Collection<NasmLabel> labels =
+                        PsiTreeUtil.getChildrenOfTypeAsList(nasmFile, NasmLabel.class).stream()
+                                .filter(Objects::nonNull)
+                                .filter(nasmLabel -> nasmLabel.getName() != null)
+                                .filter(nasmLabel -> nasmLabel.getName().equals(labelName))
+                                .collect(Collectors.toList());
+                result.addAll(labels);
             }
         }
         return result;

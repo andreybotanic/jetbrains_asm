@@ -148,8 +148,7 @@ Section ::= SECTION_DEF SECTION_NAME
 Immediate ::= Expr { extends=Expr }
 Memory ::= Identifier | Address
 Address ::= SIZE_PREFIX? EffectiveAddress
-private EffectiveAddress ::= SQUARE_L Expr SQUARE_R { pin(".*")=1 recoverWhile=EffectiveAddressRecover extends=Expr }
-private EffectiveAddressRecover ::= !(EOL | COMMENT)
+private EffectiveAddress ::= SQUARE_L Expr SQUARE_R { pin=1 extends=Expr }
 
 Register ::= REG_8 | REG_16 | REG_32 | REG_64 { extends=Expr }
 
@@ -227,9 +226,8 @@ Expr ::= Term8 { extends=Expr }
 ParenthesisExpr ::= ROUND_L Expr ROUND_R { pin(".*")=1 extends=Expr }
 ConcatExpr ::= (Identifier | DECIMAL | COLON) (TOKEN_CONCAT ConcatExpr)*    // TODO: add more rules for concat
 
-DefineCall ::= Identifier DefineCallParams { extends=Expr }
-DefineCallParams ::= ROUND_L DefineCallArg (SEPARATOR DefineCallArg)* ROUND_R { pin(".*")=1 recoverWhile=DefineCallParamsRecover }
-private DefineCallParamsRecover ::= !(EOL | COMMENT | ROUND_R | Expr)
+DefineCall ::= Identifier ROUND_L DefineCallArgsList ROUND_R { pin=2 extends=Expr }
+DefineCallArgsList ::= DefineCallArg (SEPARATOR DefineCallArg)*
 
 MacroCall ::= Identifier MacroCallArgs { extends=Expr }
 MacroCallArgs ::= (MacroCallArg | MacroCallArgSeq) (SEPARATOR (MacroCallArg | MacroCallArgSeq))*

@@ -7,6 +7,7 @@ import com.intellij.lang.annotation.Annotator;
 import com.intellij.lang.annotation.HighlightSeverity;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
@@ -40,12 +41,21 @@ public class NasmAnnotator implements Annotator {
         // Skip identifiers in define or macro
         if (PsiTreeUtil.getParentOfType(identifier, NasmDefine.class) != null /* && !findInParents(element, NasmTypes.MACRO) */ ) return;
 
+        // Skip data elements
+        PsiElement top = PsiTreeUtil.getParentOfType(identifier, NasmPrimary.class);
+        if (top != null && top.getParent() instanceof NasmFile) return;
+
         String idName = identifier.getName();
 
         if (idName == null) return;
 
+        // Search for identifiers
         List<NasmIdentifier> identifiers = NasmUtil.findIdentifierDefinitionsInProject(identifier.getProject(), idName);
-        if (identifiers.isEmpty()) {
+
+        // Search for labels
+        List<NasmLabel> labels = NasmUtil.findLabelsInProject(identifier.getProject(), idName);
+
+        if (identifiers.isEmpty() && labels.isEmpty()) {
             holder.newAnnotation(HighlightSeverity.ERROR, "Unresolved identifier '" + idName + "'")
                     .range(TextRange.from(identifier.getTextRange().getStartOffset(), identifier.getTextRange().getLength()))
                     .highlightType(ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)
