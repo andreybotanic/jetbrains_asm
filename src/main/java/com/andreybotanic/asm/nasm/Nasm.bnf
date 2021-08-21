@@ -187,7 +187,7 @@ LabelIdentifier ::= LBL | ID {
     extends     = Expr
 }
 
-DataElement ::= LBL_DEF? DataStmt EOL*
+DataElement ::= LBL_DEF? DataStmt
 DataDefStmt ::= DATA_DEF Expr (SEPARATOR Expr)* { pin=1 recoverWhile=DataValueRecover }
 DataResStmt ::= DATA_RES Expr
 private DataStmt ::= DataResStmt | DataDefStmt
