@@ -1,17 +1,18 @@
 package com.andreybotanic.asm.nasm;
 
 import com.andreybotanic.asm.icons.AsmIcons;
-import com.andreybotanic.asm.nasm.psi.NasmIdentifier;
-import com.andreybotanic.asm.nasm.psi.NasmLabel;
+import com.andreybotanic.asm.nasm.psi.*;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class NasmReference extends PsiReferenceBase<PsiElement> implements PsiPolyVariantReference {
     private final String refId;
@@ -24,10 +25,20 @@ public class NasmReference extends PsiReferenceBase<PsiElement> implements PsiPo
     @NotNull
     @Override
     public ResolveResult @NotNull [] multiResolve(boolean incompleteCode) {
-        List<NasmLabel> labels = NasmUtil.findLabelReferencesByIdInProject(myElement.getProject(), refId);
+        List<NasmNamedElement> elements =
+                NasmUtil.findNamedElementReferencesByIdInProject(myElement.getProject(), refId).stream()
+                        .filter(element -> !(element instanceof NasmLabelIdentifier))
+                        .collect(Collectors.toList());
         List<ResolveResult> results = new ArrayList<>();
-        for (NasmLabel label : labels) {
-            results.add(new PsiElementResolveResult(label));
+        for (NasmNamedElement element : elements) {
+            if (element instanceof NasmAssign || element instanceof NasmDefine) {
+                NasmNamedElement realId = (NasmNamedElement) PsiTreeUtil.skipWhitespacesForward(element.getFirstChild());
+                if (realId != null) {
+                    results.add(new PsiElementResolveResult(realId));
+                }
+            } else {
+                results.add(new PsiElementResolveResult(element));
+            }
         }
         return results.toArray(new ResolveResult[0]);
     }

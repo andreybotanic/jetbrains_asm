@@ -19,17 +19,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class NasmUtil {
-    static List<NasmLabel> findLabelReferencesByIdInProject(Project project, String targetLabelId) {
-        List<NasmLabel> result = new ArrayList<>();
+    static List<NasmNamedElement> findNamedElementReferencesByIdInProject(Project project, String targetLabelId) {
+        List<NasmNamedElement> result = new ArrayList<>();
         Collection<VirtualFile> virtualFiles =
                 FileTypeIndex.getFiles(NasmFileType.INSTANCE, GlobalSearchScope.allScope(project));
         for (VirtualFile virtualFile : virtualFiles) {
             NasmFile nasmFile = (NasmFile) PsiManager.getInstance(project).findFile(virtualFile);
             if (nasmFile != null) {
 
-                NasmLabel[] labels = findAllChildrenOfType(nasmFile, NasmLabel.class); /*PsiTreeUtil.getChildrenOfType*/
+                NasmNamedElement[] labels = findAllChildrenOfType(nasmFile, NasmNamedElement.class); /*PsiTreeUtil.getChildrenOfType*/
                 if (labels != null) {
-                    for (NasmLabel label : labels) {
+                    for (NasmNamedElement label : labels) {
                         if (targetLabelId.equals(label.getName())) {
                             result.add(label);
                         }
