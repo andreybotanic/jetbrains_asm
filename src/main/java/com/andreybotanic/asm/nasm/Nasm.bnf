@@ -160,7 +160,6 @@ private Operands ::= Operand (SEPARATOR Operand)* { pin=1 recoverWhile=OperandRe
 private OperandRecover ::= !(COMMENT | EOL)
 
 Operand ::= Register
-          | DefineCall
           | Immediate
           | Memory
           | MacroCall
