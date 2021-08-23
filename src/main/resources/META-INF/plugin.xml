@@ -43,6 +43,9 @@
         <spellchecker.support
                 language="Nasm"
                 implementationClass="com.andreybotanic.asm.nasm.NasmSpellcheckingStrategy"/>
+        <completion.contributor
+                language="Nasm"
+                implementationClass="com.andreybotanic.asm.nasm.completion.NasmCompletionContributor"/>
     </extensions>
 
     <actions>
