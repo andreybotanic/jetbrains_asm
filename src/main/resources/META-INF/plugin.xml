@@ -23,6 +23,8 @@
                                        implementationClass="com.andreybotanic.asm.nasm.NasmSyntaxHighlighterFactory"/>
         <lang.namesValidator language="Nasm"
                              implementationClass="com.andreybotanic.asm.nasm.NasmNamesValidator"/>
+        <lang.findUsagesProvider language="Nasm"
+                                 implementationClass="com.andreybotanic.asm.nasm.NasmFindUsagesProvider"/>
         <colorSettingsPage implementation="com.andreybotanic.asm.nasm.NasmColorSettingsPage"/>
         <annotator language="Nasm"
                    implementationClass="com.andreybotanic.asm.nasm.NasmAnnotator"/>
