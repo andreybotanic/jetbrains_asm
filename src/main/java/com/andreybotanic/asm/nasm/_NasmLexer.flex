@@ -22,6 +22,8 @@ import static com.andreybotanic.asm.nasm.psi.NasmTypes.*;
 %type IElementType
 %unicode
 
+EOL=\R
+WHITE_SPACE=\s+
 
 WHITE_SPACE=[ \t\x0B\f]+
 EOL=\R
@@ -41,7 +43,8 @@ REG_32=[eE][aAbBcCdD][xX]
 REG_64=[rR][aAbBcCdD][xX]
 OP_PREFIX=((rep(n?[ez])|rep)|lock|bnd|xacquire|xrelease)
 SIZE_PREFIX=byte|word|dword|qword
-GENERAL_OP=mov|xor|add|inc|dec|jmp
+JUMP_OP=jmp|jn?[abceglopsz]|jn?[abgl]e|jp[eo]|j[er]?cxz
+GENERAL_OP=mov|xor|add|inc|dec|{JUMP_OP}
 ID=([a-zA-Z_?]+[a-zA-Z0-9_$.#@~?]*)
 LBL_DEF=([a-zA-Z$._?#@]+[a-zA-Z0-9$._~]*):
 LBL=([a-zA-Z$._?#@]+[a-zA-Z0-9$._~]*)

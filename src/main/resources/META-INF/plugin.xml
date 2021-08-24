@@ -36,6 +36,9 @@
         <lang.quoteHandler
                 language="Nasm"
                 implementationClass="com.andreybotanic.asm.nasm.NasmQuoteHandler"/>
+        <lang.formatter
+                language="Nasm"
+                implementationClass="com.andreybotanic.asm.nasm.formatting.NasmFormattingModelBuilder"/>
         <colorSettingsPage implementation="com.andreybotanic.asm.nasm.NasmColorSettingsPage"/>
         <annotator
                 language="Nasm"
