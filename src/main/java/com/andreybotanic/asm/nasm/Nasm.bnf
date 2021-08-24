@@ -59,8 +59,8 @@
     ZEROES              = 'regexp:[0]+'
     DECIMAL             = 'regexp:((0[dD])?[0-9]+)'
     FLOAT_DECIMAL       = 'regexp:(([0-9]*\.[^A-Za-z][0-9]*)([Ee][+-]?[0-9]+)?)'
-    CHARACTER           = "regexp:(`([^`\\]|\\.)`|'([^'\\]|\\.)')"
-    STRING              = "regexp:(`([^`\\]|\\.)*`|'([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")"
+    CHARACTER           = "regexp:(`([^`\\]|\\.)`?|'([^'\\]|\\.)'?)"
+    STRING              = "regexp:(`([^`\\]|\\.)*`?|'([^'\\]|\\.)*'?|\"([^\"\\]|\\.)*\"?)"
 
     COLON               = ':'
     SEMICOLON           = ';'
@@ -123,7 +123,7 @@ Preprocessor ::= Include
 
 private InlineItem ::= Expr | Label | Instruction | DataElement | Identifier  { extends=Expr }
 
-Include ::= INCLUDE_TAG STRING
+Include ::= INCLUDE_TAG Str
 Define ::= (DEFINE_TAG Identifier DefineParams InlineItem )
          | (DEFINE_TAG Identifier InlineItem ) {
     pin         = 1
@@ -235,5 +235,6 @@ private MacroCallArgSeqRecover ::= !(COMMENT | EOL)
 MacroCallArg ::= Expr { extends=Expr }
 DefineCallArg ::= Expr { extends=Expr }
 
-NumericLiteral ::= BINARY|ZEROES|HEXADECIMAL|DECIMAL|FLOAT_DECIMAL|CHARACTER { extends=Expr }
-Str ::= STRING { extends=Expr }
+NumericLiteral ::= BINARY|ZEROES|HEXADECIMAL|DECIMAL|FLOAT_DECIMAL|Char { extends=Expr }
+Str ::= STRING { extends=Expr methods=[isValid] }
+Char ::= CHARACTER { extends=Expr methods=[isValid] }

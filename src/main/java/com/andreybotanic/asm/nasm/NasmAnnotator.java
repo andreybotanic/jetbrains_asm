@@ -29,6 +29,10 @@ public class NasmAnnotator implements Annotator {
     public void annotate(@NotNull PsiElement element, @NotNull AnnotationHolder holder) {
         if (element instanceof NasmIdentifier) {
             annotateUnresolvedReference((NasmIdentifier) element, holder);
+        } else if (element instanceof NasmStr) {
+            annotateUnclosedString((NasmStr) element, holder);
+        } else if (element instanceof NasmChar) {
+            annotateUnclosedCharacter((NasmChar) element, holder);
         }
     }
 
@@ -59,6 +63,24 @@ public class NasmAnnotator implements Annotator {
             holder.newAnnotation(HighlightSeverity.ERROR, "Unresolved identifier '" + idName + "'")
                     .range(TextRange.from(identifier.getTextRange().getStartOffset(), identifier.getTextRange().getLength()))
                     .highlightType(ProblemHighlightType.LIKE_UNKNOWN_SYMBOL)
+                    .create();
+        }
+    }
+
+    private void annotateUnclosedString(@NotNull NasmStr string, @NotNull AnnotationHolder holder) {
+        if (!string.isValid()) {
+            holder.newAnnotation(HighlightSeverity.ERROR, "Unclosed string literal")
+                    .range(TextRange.from(string.getTextRange().getStartOffset(), string.getTextRange().getLength()))
+                    .highlightType(ProblemHighlightType.GENERIC_ERROR_OR_WARNING)
+                    .create();
+        }
+    }
+
+    private void annotateUnclosedCharacter(@NotNull NasmChar character, @NotNull AnnotationHolder holder) {
+        if (!character.isValid()) {
+            holder.newAnnotation(HighlightSeverity.ERROR, "Unclosed character literal")
+                    .highlightType(ProblemHighlightType.GENERIC_ERROR_OR_WARNING)
+                    .range(TextRange.from(character.getTextRange().getStartOffset(), character.getTextRange().getLength()))
                     .create();
         }
     }

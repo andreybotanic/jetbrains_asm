@@ -148,5 +148,14 @@ public class NasmPsiImplUtil {
         return setName((NasmIdentifier) getNameIdentifier(define), newName);
     }
 
+    public static boolean isValid(NasmStr str) {
+        String text = str.getFirstChild().getText();
+        return text.charAt(0) == text.charAt(text.length() - 1);
+    }
+
+    public static boolean isValid(NasmChar str) {
+        String text = str.getFirstChild().getText();
+        return text.charAt(0) == text.charAt(text.length() - 1);
+    }
 
 }

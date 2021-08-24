@@ -33,6 +33,9 @@
         <lang.braceMatcher
                 language="Nasm"
                 implementationClass="com.andreybotanic.asm.nasm.NasmBraceMatcher"/>
+        <lang.quoteHandler
+                language="Nasm"
+                implementationClass="com.andreybotanic.asm.nasm.NasmQuoteHandler"/>
         <colorSettingsPage implementation="com.andreybotanic.asm.nasm.NasmColorSettingsPage"/>
         <annotator
                 language="Nasm"
