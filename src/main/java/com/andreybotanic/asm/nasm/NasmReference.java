@@ -2,8 +2,11 @@ package com.andreybotanic.asm.nasm;
 
 import com.andreybotanic.asm.icons.AsmIcons;
 import com.andreybotanic.asm.nasm.psi.*;
+import com.intellij.codeInsight.completion.InsertHandler;
+import com.intellij.codeInsight.completion.InsertionContext;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.openapi.editor.EditorModificationUtil;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -21,6 +24,10 @@ public class NasmReference extends PsiReferenceBase<PsiElement> implements PsiPo
         super(element, rangeInElement);
         refId = element.getText().substring(rangeInElement.getStartOffset(), rangeInElement.getEndOffset());
     }
+
+    private static final InsertHandler<LookupElement> SIMPLE_HANDLER = (context, item) ->
+            EditorModificationUtil.insertStringAtCaret(context.getEditor(), " ");
+
 
     @NotNull
     @Override
@@ -53,14 +60,15 @@ public class NasmReference extends PsiReferenceBase<PsiElement> implements PsiPo
     @NotNull
     @Override
     public Object @NotNull [] getVariants() {
-        List<NasmIdentifier> identifiers = NasmUtil.findIdentifierReferencesInProject(myElement.getProject());
+        List<NasmNamedElement> identifiers = NasmUtil.findIdentifierReferencesInProject(myElement.getProject());
         List<LookupElement> variants = new ArrayList<>();
-        for (final NasmIdentifier identifier : identifiers) {
-            String identifierText = identifier.getId().getText();
+        for (final NasmNamedElement identifier : identifiers) {
+            String identifierText = identifier.getName();
             if (identifierText != null && identifierText.length() > 0) {
-                variants.add(LookupElementBuilder.create(identifier.getId())
+                variants.add(LookupElementBuilder.create(identifierText)
                         .withIcon(AsmIcons.NasmFileType)
                         .withTypeText(identifier.getContainingFile().getName())
+                        .withInsertHandler(SIMPLE_HANDLER)  // TODO: add DEFINE_HANDLER
                 );
             }
         }

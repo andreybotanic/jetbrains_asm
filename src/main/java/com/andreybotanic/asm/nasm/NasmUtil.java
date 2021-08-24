@@ -70,13 +70,15 @@ public class NasmUtil {
         return result;
     }
 
-    static List<NasmIdentifier> findIdentifierReferencesInProject(Project project) {
-        List<NasmIdentifier> result = new ArrayList<>();
+    static List<NasmNamedElement> findIdentifierReferencesInProject(Project project) {
+        List<NasmNamedElement> result = new ArrayList<>();
         Collection<VirtualFile> virtualFiles = FileTypeIndex.getFiles(NasmFileType.INSTANCE, GlobalSearchScope.allScope(project));
         for (VirtualFile virtualFile : virtualFiles) {
             NasmFile nasmFile = (NasmFile)PsiManager.getInstance(project).findFile(virtualFile);
             if (nasmFile != null) {
-                Collection<NasmIdentifier> nasmIdentifiers = PsiTreeUtil.collectElementsOfType(nasmFile, NasmIdentifier.class);
+                Collection<NasmNamedElement> nasmIdentifiers = PsiTreeUtil.collectElementsOfType(nasmFile, NasmNamedElement.class).stream()
+                        .filter(identifier -> PsiTreeUtil.getParentOfType(identifier, NasmDefine.class) == null)
+                        .collect(Collectors.toList());
                 result.addAll(nasmIdentifiers);
             }
         }
