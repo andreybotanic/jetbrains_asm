@@ -109,7 +109,8 @@
 
 NasmFile ::= item_*
 
-private item_ ::= COMMENT
+private item_ ::= BlockComment
+                | COMMENT
                 | Section
                 | Preprocessor
                 | Directive
@@ -154,7 +155,7 @@ private EffectiveAddress ::= SQUARE_L Expr SQUARE_R { pin=1 extends=Expr }
 
 Register ::= REG_8 | REG_16 | REG_32 | REG_64 { extends=Expr }
 
-Instruction ::= Operation Operands? COMMENT?
+Instruction ::= Operation Operands?
 
 Operation ::= GENERAL_OP { extends=Expr }
 
@@ -240,3 +241,4 @@ DefineCallArg ::= Expr { extends=Expr }
 NumericLiteral ::= BINARY|ZEROES|HEXADECIMAL|DECIMAL|FLOAT_DECIMAL|Char { extends=Expr }
 Str ::= STRING { extends=Expr methods=[isValid] }
 Char ::= CHARACTER { extends=Expr methods=[isValid] }
+BlockComment ::= COMMENT (EOL COMMENT)+ { pin=2 }

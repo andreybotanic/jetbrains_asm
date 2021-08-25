@@ -61,7 +61,7 @@ STRING=(`([^`\\]|\\.)*`?|'([^'\\]|\\.)*'?|\"([^\"\\]|\\.)*\"?)
   {WHITE_SPACE}           { return WHITE_SPACE; }
 
   ":"                     { return COLON; }
-  ";"                     { return SEMICOLON; }
+  ";"                     { return COMMENT; }
   "["                     { return SQUARE_L; }
   "]"                     { return SQUARE_R; }
   "("                     { return ROUND_L; }
