@@ -1,6 +1,7 @@
 package com.andreybotanic.asm.nasm;
 
 import com.andreybotanic.asm.nasm.psi.*;
+import com.andreybotanic.asm.nasm.quickfix.NasmMoveZeroFix;
 import com.intellij.codeInspection.ProblemHighlightType;
 import com.intellij.lang.annotation.AnnotationHolder;
 import com.intellij.lang.annotation.Annotator;
@@ -33,6 +34,8 @@ public class NasmAnnotator implements Annotator {
             annotateUnclosedString((NasmStr) element, holder);
         } else if (element instanceof NasmChar) {
             annotateUnclosedCharacter((NasmChar) element, holder);
+        } else if (element instanceof NasmInstruction) {
+            annotateInstruction((NasmInstruction) element, holder);
         }
     }
 
@@ -81,6 +84,17 @@ public class NasmAnnotator implements Annotator {
             holder.newAnnotation(HighlightSeverity.ERROR, "Unclosed character literal")
                     .highlightType(ProblemHighlightType.GENERIC_ERROR_OR_WARNING)
                     .range(TextRange.from(character.getTextRange().getStartOffset(), character.getTextRange().getLength()))
+                    .create();
+        }
+    }
+
+    private void annotateInstruction(@NotNull NasmInstruction instruction, @NotNull AnnotationHolder holder) {
+        // Check for all possible fixes
+        if (instruction.getOperation().getText().equals("mov") && instruction.getOperandList().get(1).getText().equals("0")) {
+            holder.newAnnotation(HighlightSeverity.WEAK_WARNING, "Not optimized code")
+                    .highlightType(ProblemHighlightType.WEAK_WARNING)
+                    .range(instruction.getTextRange())
+                    .withFix(new NasmMoveZeroFix())
                     .create();
         }
     }

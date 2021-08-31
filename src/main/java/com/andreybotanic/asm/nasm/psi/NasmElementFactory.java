@@ -8,6 +8,12 @@ import com.intellij.psi.PsiFileFactory;
 import com.intellij.psi.util.PsiTreeUtil;
 
 public class NasmElementFactory {
+    private static NasmFile createFile(Project project, String text) {
+        return (NasmFile) PsiFileFactory
+                .getInstance(project)
+                .createFileFromText("dummy.create.asm", NasmFileType.INSTANCE, text);
+    }
+
     public static NasmLabel createLabel(Project project, String name) {
         final NasmFile file = createFile(project, name + ":");
         return (NasmLabel) file.getFirstChild();
@@ -19,7 +25,7 @@ public class NasmElementFactory {
     }
 
     public static NasmLabelIdentifier createLabelIdentifierId(Project project, String name) {
-        final NasmFile file = createFile(project, "db short "+name);
+        final NasmFile file = createFile(project, "db short " + name);
         return PsiTreeUtil.getChildOfType(file.getFirstChild(), NasmLabelIdentifier.class);
     }
 
@@ -27,11 +33,12 @@ public class NasmElementFactory {
         if (name.charAt(0) == '.') {
             name = name.substring(1);
         }
-        final NasmFile file = createFile(project, "db ."+name);
+        final NasmFile file = createFile(project, "db ." + name);
         return PsiTreeUtil.getChildOfType(file.getFirstChild(), NasmLabelIdentifier.class);
     }
 
-    private static NasmFile createFile(Project project, String text) {
-        return (NasmFile) PsiFileFactory.getInstance(project).createFileFromText("dummy.create.asm", NasmFileType.INSTANCE, text);
+    public static NasmInstruction createInstruction(Project project, String instruction, String[] operands) {
+        final NasmFile file = createFile(project, instruction + " " + String.join(",", operands));
+        return (NasmInstruction) file.getFirstChild().getFirstChild();
     }
 }
