@@ -39,6 +39,9 @@
         <lang.formatter
                 language="Nasm"
                 implementationClass="com.andreybotanic.asm.nasm.formatting.NasmFormattingModelBuilder"/>
+        <lang.foldingBuilder
+                language="Nasm"
+                implementationClass="com.andreybotanic.asm.nasm.NasmFoldingBuilder"/>
         <colorSettingsPage implementation="com.andreybotanic.asm.nasm.NasmColorSettingsPage"/>
         <annotator
                 language="Nasm"
