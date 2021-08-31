@@ -22,6 +22,8 @@ public class NasmSyntaxHighlighter extends SyntaxHighlighterBase {
             createTextAttributesKey("NASM_SEPARATOR", DefaultLanguageHighlighterColors.COMMA);
     public static final TextAttributesKey COMMENT =
             createTextAttributesKey("NASM_COMMENT", DefaultLanguageHighlighterColors.LINE_COMMENT);
+    public static final TextAttributesKey DOC_COMMENT =
+            createTextAttributesKey("NASM_DOC_COMMENT", DefaultLanguageHighlighterColors.DOC_COMMENT);
     public static final TextAttributesKey PREPROCESSOR_TAG =
             createTextAttributesKey("NASM_PREPROCESSOR_TAG", DefaultLanguageHighlighterColors.METADATA);
     public static final TextAttributesKey NUMBER =

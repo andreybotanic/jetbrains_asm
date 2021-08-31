@@ -28,6 +28,11 @@
     DATA_DEF            = 'regexp:[dD][bBwWdDqQtToOyYzZ]'
     DATA_RES            = 'regexp:[rR][eE][sS][bBwWdDqQtToOyYzZ]'
 
+    DOC_COMMENT_INLINE = 'regexp:;[ \t\x0B\f]*/\*\*[^\r\n]*\*/[^\r\n]*'
+    DOC_COMMENT_START
+    DOC_COMMENT_END = 'regexp:;[ \t\x0B\f]*\*/[^\r\n]*'
+    DOC_COMMENT_DATA
+
     COMMENT             = 'regexp:;[^\r\n]*'
 
     SECTION_DEF         = 'regexp:section|segment'
@@ -111,11 +116,11 @@ NasmFile ::= item_*
 
 private item_ ::= BlockComment
                 | COMMENT
-                | Section
-                | Preprocessor
-                | Directive
-                | MacroCall
-                | InlineItem
+                | Section COMMENT?
+                | Preprocessor COMMENT?
+                | Directive COMMENT ?
+                | MacroCall COMMENT?
+                | InlineItem COMMENT?
                 | EOL
                 ;
 

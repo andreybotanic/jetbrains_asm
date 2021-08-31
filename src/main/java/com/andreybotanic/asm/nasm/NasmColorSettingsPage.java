@@ -19,6 +19,7 @@ public class NasmColorSettingsPage implements ColorSettingsPage {
     private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
             new AttributesDescriptor("Separator", NasmSyntaxHighlighter.SEPARATOR),
             new AttributesDescriptor("Comment", NasmSyntaxHighlighter.COMMENT),
+            new AttributesDescriptor("Documentation comment", NasmSyntaxHighlighter.DOC_COMMENT),
             new AttributesDescriptor("Number", NasmSyntaxHighlighter.NUMBER),
             new AttributesDescriptor("NASM mnemonic", NasmSyntaxHighlighter.OPERATION),
             new AttributesDescriptor("Label", NasmSyntaxHighlighter.LABEL),
