@@ -9,8 +9,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.util.IncorrectOperationException;
 import org.jetbrains.annotations.NotNull;
 
-
-public class NasmMoveZeroFix extends NasmOptimizeQuickFix {
+public class NasmAddSubFix extends NasmOptimizeQuickFix {
     @Override
     public void invoke(@NotNull Project project, Editor editor, @NotNull PsiElement element) throws IncorrectOperationException {
         NasmInstruction instruction = findInstruction(element);
@@ -18,9 +17,13 @@ public class NasmMoveZeroFix extends NasmOptimizeQuickFix {
             return;
         }
         String register = instruction.getOperandList().get(0).getText();
-        String[] operands = new String[]{register, register};
-        NasmInstruction newInstruction = NasmElementFactory.createInstruction(project, "xor", operands);
-        instruction.replace(newInstruction);
+        if (instruction.getOperation().getText().equals("add")) {
+            NasmInstruction newInstruction = NasmElementFactory.createInstruction(project, "inc", new String[]{register});
+            instruction.replace(newInstruction);
+        } else if (instruction.getOperation().getText().equals("sub")) {
+            NasmInstruction newInstruction = NasmElementFactory.createInstruction(project, "dec", new String[]{register});
+            instruction.replace(newInstruction);
+        }
     }
 
     @Override
@@ -30,6 +33,6 @@ public class NasmMoveZeroFix extends NasmOptimizeQuickFix {
 
     @Override
     public @IntentionName @NotNull String getText() {
-        return "Replace with XOR";
+        return "Replace with INC / DEC";
     }
 }

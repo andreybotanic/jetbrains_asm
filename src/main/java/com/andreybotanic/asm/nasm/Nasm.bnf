@@ -52,7 +52,7 @@
     SIZE_PREFIX         = 'regexp:byte|word|dword|qword'
 
     JUMP_OP             = 'regexp:jmp|jn?[abceglopsz]|jn?[abgl]e|jp[eo]|j[er]?cxz'
-    GENERAL_OP          = 'regexp:mov|xor|add|inc|dec|{JUMP_OP}'
+    GENERAL_OP          = 'regexp:mov|xor|add|sub|inc|dec|{JUMP_OP}'
 
 
     // Make last!
