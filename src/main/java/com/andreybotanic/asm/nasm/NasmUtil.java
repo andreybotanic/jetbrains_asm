@@ -102,7 +102,7 @@ public class NasmUtil {
         return result;
     }
 
-    static List<NasmIdentifier> findIdentifierDefinitionsInProject(Project project, @NotNull String identifierName) {
+    public static List<NasmIdentifier> findIdentifierDefinitionsInProject(Project project, @NotNull String identifierName) {
         List<NasmIdentifier> result = new ArrayList<>();
         Collection<VirtualFile> virtualFiles = FileTypeIndex.getFiles(NasmFileType.INSTANCE, GlobalSearchScope.allScope(project));
         for (VirtualFile virtualFile : virtualFiles) {
@@ -138,7 +138,7 @@ public class NasmUtil {
         return result;
     }
 
-    static List<NasmLabel> findLabelsInProject(Project project, @NotNull String labelName) {
+    public static List<NasmLabel> findLabelsInProject(Project project, @NotNull String labelName) {
         List<NasmLabel> result = new ArrayList<>();
         Collection<VirtualFile> virtualFiles = FileTypeIndex.getFiles(NasmFileType.INSTANCE, GlobalSearchScope.allScope(project));
         for (VirtualFile virtualFile : virtualFiles) {

@@ -1,5 +1,7 @@
-package com.andreybotanic.asm.nasm;
+package com.andreybotanic.asm.nasm.annotations;
 
+import com.andreybotanic.asm.nasm.NasmFile;
+import com.andreybotanic.asm.nasm.NasmUtil;
 import com.andreybotanic.asm.nasm.psi.*;
 import com.andreybotanic.asm.nasm.quickfix.NasmAddSubFix;
 import com.andreybotanic.asm.nasm.quickfix.NasmMoveZeroFix;
@@ -30,8 +32,6 @@ public class NasmAnnotator implements Annotator {
             annotateUnclosedString((NasmStr) element, holder);
         } else if (element instanceof NasmChar) {
             annotateUnclosedCharacter((NasmChar) element, holder);
-        } else if (element instanceof NasmInstruction) {
-            annotateInstruction((NasmInstruction) element, holder);
         }
     }
 
@@ -81,25 +81,6 @@ public class NasmAnnotator implements Annotator {
                     .highlightType(ProblemHighlightType.GENERIC_ERROR_OR_WARNING)
                     .range(TextRange.from(character.getTextRange().getStartOffset(), character.getTextRange().getLength()))
                     .create();
-        }
-    }
-
-    private void annotateInstruction(@NotNull NasmInstruction instruction, @NotNull AnnotationHolder holder) {
-        // Check for all possible fixes
-        AnnotationBuilder warningAnnotationBuilder = holder
-                .newAnnotation(HighlightSeverity.WARNING, "Not optimized code")
-                .highlightType(ProblemHighlightType.WEAK_WARNING)
-                .range(instruction.getTextRange());
-
-        if (instruction.getOperation().getText().equals("mov")
-                && instruction.getOperandList().get(0).getFirstChild() instanceof NasmRegister
-                && instruction.getOperandList().get(1).getText().equals("0")) {
-            warningAnnotationBuilder.withFix(new NasmMoveZeroFix()).create();
-        } else if ((instruction.getOperation().getText().equals("add")
-                    || instruction.getOperation().getText().equals("sub"))
-                && instruction.getOperandList().get(0).getFirstChild() instanceof NasmRegister
-                && instruction.getOperandList().get(1).getText().equals("1")) {
-            warningAnnotationBuilder.withFix(new NasmAddSubFix()).create();
         }
     }
 }
