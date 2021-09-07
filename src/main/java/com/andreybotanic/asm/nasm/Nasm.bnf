@@ -28,11 +28,6 @@
     DATA_DEF            = 'regexp:[dD][bBwWdDqQtToOyYzZ]'
     DATA_RES            = 'regexp:[rR][eE][sS][bBwWdDqQtToOyYzZ]'
 
-    DOC_COMMENT_INLINE = 'regexp:;[ \t\x0B\f]*/\*\*[^\r\n]*\*/[^\r\n]*'
-    DOC_COMMENT_START
-    DOC_COMMENT_END = 'regexp:;[ \t\x0B\f]*\*/[^\r\n]*'
-    DOC_COMMENT_DATA
-
     COMMENT             = 'regexp:;[^\r\n]*'
 
     SECTION_DEF         = 'regexp:section|segment'
@@ -48,12 +43,24 @@
     REG_64              = 'regexp:[rR][aAbBcCdD][xX]'
 
     // Instruction operation prefixes
-    OP_PREFIX           = 'regexp:((rep(n?[ez])|rep)|lock|bnd|xacquire|xrelease)'
-    SIZE_PREFIX         = 'regexp:byte|word|dword|qword'
+    OP_PREFIX           = 'regexp:[rR][eE][pP]([nN]?[eEzZ])?|[lL][oO][cC][kK]|[bB][nN][dD]|[xX][aA][cC][qQ][uU][iI][rR][eE]|[xX][rR][eE][lL][eE][aA][sS][eE]'
+    SIZE_PREFIX         = 'regexp:[bB][yY][tT][eE]|[dDqQ]?[wW][oO][rR][dD]'
 
-    JUMP_OP             = 'regexp:jmp|jn?[abceglopsz]|jn?[abgl]e|jp[eo]|j[er]?cxz'
-    GENERAL_OP          = 'regexp:mov|xor|add|sub|inc|dec|{JUMP_OP}'
+    // NOTE: Don't forget to remove (or comment out) all following rules in lexer:
+    ARITHMETIC_OP       = 'regexp:[iI][nN][cC]|[dD][eE][cC]|[aA][dD][dD]|[sS][uU][bB]|[iI][mM][uU][lL]|[iI][dD][iI][vV]|[nN][eE][gG]'
+    LOGIC_OP            = 'regexp:[xX]?[oO][rR]|[aA][nN][dD]|[nN][oO][tT]|[bB][tT][cCsSrR]?|[tT][eE][sS][tT]'
+    BIT_SHIFT_OP        = 'regexp:[sS][aAhH][lL][rR]|[rR][cCoO][lL][rR]'
+    STACK_OP            = 'regexp:([pP][uU][sS][hH]|[pP][oO][pP])([aAfF][dD]?)?'
+    MOV_OP              = 'regexp:[mM][oO][vV]'
+    STR_MOV_OP          = 'regexp:[mM][oO][vV]([sSbBwWdD]|[zZ]?[xX])'
+    STR_LOAD_OP         = 'regexp:[lL][oO][dD][sS]([bB][wW][dD])?'
+    STR_STORE_OP        = 'regexp:[sS][tT][oO][sS]([bB][wW][dD])?'
+    STR_OP              = 'regexp:{STR_MOV_OP}|{STR_LOAD_OP}|{STR_STORE_OP}'
+    JUMP_OP             = 'regexp:[jJ][mM][pP]|[jJ][nN]?[aAbBcCeEgGlLoOpPsSzZ]|[jJ][nN]?[aAbBgGlL][eE]|[jJ][pP][eEoO]|[jJ][eErR]?[cC][xX][zZ]'
+    LOOP_OP             = 'regexp:[lL][oO][oO][pP][dD]?([nN]?[eEzZ])?'
 
+    // NOTE: Only this rule is real MNEMONIC rule
+    GENERAL_OP          = 'regexp:{ARITHMETIC_OP}|{LOGIC_OP}|{BIT_SHIFT_OP}|{STACK_OP}|{MOV_OP}|{STR_OP}|{JUMP_OP}|{LOOP_OP}'
 
     // Make last!
     ID                  = 'regexp:([a-zA-Z_?]+[a-zA-Z0-9_$.#@~?]*)' // Some identifier
@@ -70,7 +77,7 @@
     STRING              = "regexp:(`([^`\\]|\\.)*`?|'([^'\\]|\\.)*'?|\"([^\"\\]|\\.)*\"?)"
 
     COLON               = ':'
-    SEMICOLON           = ';'
+    SEMICOLON           = ';'   // NOTE: Change token type to COMMENT in lexer
     SQUARE_L            = '['
     SQUARE_R            = ']'
     ROUND_L             = '('
